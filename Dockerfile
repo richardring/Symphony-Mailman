@@ -1,4 +1,4 @@
-FROM gcr.io.google-appengine/python
+FROM gcr.io/google-appengine/python
 
 # Create the venv for dependencies
 RUN virtualenv -p python3.6 /env
