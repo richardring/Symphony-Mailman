@@ -18,4 +18,6 @@ ADD . /app
 # expose port 25
 EXPOSE 25
 
-CMD [ "python", "./main.py" ]
+# , "./main.py"
+
+CMD [ "python" ]
