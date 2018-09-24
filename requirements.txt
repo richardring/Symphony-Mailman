@@ -1,0 +1,17 @@
+aiosmtpd==1.2
+asn1crypto==0.24.0
+atpublic==1.0
+certifi==2018.8.24
+cffi==1.11.5
+chardet==3.0.4
+cryptography==2.3.1
+idna==2.6
+IPy==0.83
+py3dns==3.2.0
+pycparser==2.19
+PyJWT==1.6.4
+pyspf==2.0.11
+requests==2.18.4
+requests-toolbelt==0.8.0
+six==1.11.0
+urllib3==1.22

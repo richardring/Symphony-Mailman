@@ -1,0 +1,7 @@
+messages
+setup
+*.sqlite
+config.json
+config_old.json
+symphony/certs
+.idea

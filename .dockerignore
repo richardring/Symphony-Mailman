@@ -1,0 +1,6 @@
+client
+messages
+setup
+*.sqlite
+test_client.py
+config_old.json
