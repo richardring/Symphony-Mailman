@@ -125,5 +125,5 @@ def start_server():
 
     # Wait for user to press Return
     # TODO: Create a better handler for exiting from the server
-    input('SMTP server is running on dedicated thread. Press Return to stop server and exit. \n\n')
-    controller.stop()
+    # input('SMTP server is running on dedicated thread. Press Return to stop server and exit. \n\n')
+    # controller.stop()
