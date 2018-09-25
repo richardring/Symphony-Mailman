@@ -3,6 +3,7 @@ from aiosmtpd.controller import Controller
 from aiosmtpd.smtp import Envelope, Session, SMTP
 from email.message import Message
 import spf
+import time
 
 import botlog as log
 import config
@@ -122,8 +123,12 @@ def start_server():
 
     try:
         # Run the event loop in a separate thread
-        log.LogSystemInfo('Starting SMTP server...')
+        log.LogSystemInfo('Starting SMTP server on dedicated thread...')
         controller.start()
+
+        while True:
+            time.sleep(15)
+            log.LogSystemInfo('Checking in...')
 
         # Wait for user to press Return
         # TODO: Create a better handler for exiting from the server
