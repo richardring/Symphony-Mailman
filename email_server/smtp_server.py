@@ -122,6 +122,7 @@ def start_server():
 
     try:
         # Run the event loop in a separate thread
+        log.LogSystemInfo('Starting SMTP server...')
         controller.start()
 
         # Wait for user to press Return
@@ -131,4 +132,5 @@ def start_server():
     except Exception as ex:
         log.LogSystemErrorVerbose(str(ex))
     finally:
-        controller.stop()
+        log.LogSystemInfo('Stopping SMTP server...')
+        # controller.stop()
