@@ -120,10 +120,15 @@ def start_server():
     handler = Hermes_EmailHandler()
     controller = Controller(handler, hostname=config.SMTPServerHost, port=config.SMTPServerPort)
 
-    # Run the event loop in a separate thread
-    controller.start()
+    try:
+        # Run the event loop in a separate thread
+        controller.start()
 
-    # Wait for user to press Return
-    # TODO: Create a better handler for exiting from the server
-    # input('SMTP server is running on dedicated thread. Press Return to stop server and exit. \n\n')
-    # controller.stop()
+        # Wait for user to press Return
+        # TODO: Create a better handler for exiting from the server
+        # input('SMTP server is running on dedicated thread. Press Return to stop server and exit. \n\n')
+        # controller.stop()
+    except Exception as ex:
+        log.LogSystemErrorVerbose(str(ex))
+    finally:
+        controller.stop()
