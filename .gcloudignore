@@ -1,0 +1,12 @@
+# project files I don't need in the image
+client
+messages
+setup
+*.sqlite
+test_client.py
+
+# dev files I don't want
+.git
+.dockerignore
+.gcloudignore
+.gitignore
