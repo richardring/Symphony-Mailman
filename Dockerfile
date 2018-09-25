@@ -20,4 +20,4 @@ EXPOSE 25
 
 # , "./main.py"
 
-CMD [ "python" ]
+CMD [ "python", "main.py" ]
