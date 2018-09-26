@@ -8,6 +8,20 @@ import config
 import exceptions
 import symphony.messaging as messaging
 
+def SendEHLO():
+    server = smtplib.SMTP('35.237.41.20', 1025)
+    # server = smtplib.SMTP('192.168.0.190', 25)
+
+    server.set_debuglevel(True)
+
+    try:
+        response = server.ehlo('symphony.com')
+        print(response)
+    except Exception as ex:
+        print(str(ex))
+
+
+
 
 def SendTestEmail(valid_sender: bool=True, valid_recipients: bool=True, valid_body: bool=True):
     # msg = MIMEText('Testing simultaneous forwarding of an email to several users and a room.')
@@ -106,6 +120,8 @@ def RunClient():
             SendTestEmail(True, False)
         elif choice == "4":
             SendTestEmail(True, True, False)
+        elif choice == "5":
+            SendEHLO()
         elif choice == "9":
             SendTestIM()
         elif choice == "99":
@@ -123,6 +139,7 @@ def MenuPrompt():
     prompt += "[2] Send a test email with an invalid sender \n"
     prompt += "[3] Send a test email with an invalid recipient \n"
     prompt += "[4] Send a test email with a malformed body \n"
+    prompt += "[5] Send an EHLO\n"
     prompt += "[9] Send a test message to Symphony\n"
     prompt += "[99] Send an echo test\n"
 

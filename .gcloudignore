@@ -10,3 +10,4 @@ test_client.py
 .dockerignore
 .gcloudignore
 .gitignore
+logs

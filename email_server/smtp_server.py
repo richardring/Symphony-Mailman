@@ -127,8 +127,8 @@ def start_server():
         controller.start()
 
         while True:
-            time.sleep(15)
-            log.LogSystemInfo('Checking in...')
+            time.sleep(60)
+            log.LogSystemInfo('Heartbeat...ba-dump...')
 
         # Wait for user to press Return
         # TODO: Create a better handler for exiting from the server

@@ -3,3 +3,4 @@ messages
 setup
 *.sqlite
 test_client.py
+logs

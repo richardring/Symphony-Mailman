@@ -5,3 +5,4 @@ config.json
 config_old.json
 symphony/certs
 .idea
+logs
