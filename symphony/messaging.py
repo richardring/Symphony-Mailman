@@ -1,9 +1,11 @@
 import json
+from typing import List
 
 import botlog as log
 import symphony.connection as conn
 import symphony.endpoints as ep
 import symphony.utility as util
+from email_server.models import MessageAttachment
 
 
 def SendEcho(message: str):
@@ -16,11 +18,12 @@ def SendEcho(message: str):
     return LogMessagePost(response, 'echo', message)
 
 
-def SendUserIMv2(userIds: list, message: str, data=None):
-    return SendUserIM(userIds, message, endpoint_version=4, data=data)
+def SendUserIMv2(userIds: list, message: str, data=None, attachments: List[MessageAttachment]=None):
+    return SendUserIM(userIds, message, endpoint_version=4, data=data, attachments=attachments)
 
 
-def SendUserIM(userIds: list, message: str, endpoint_version: int=2, data=None):
+def SendUserIM(userIds: list, message: str, endpoint_version: int=2, data=None,
+               attachments: List[MessageAttachment]=None):
     endpoint = ep.CreateIM_Endpoint()
 
     body = [int(uid) for uid in userIds]
@@ -34,7 +37,7 @@ def SendUserIM(userIds: list, message: str, endpoint_version: int=2, data=None):
     if endpoint_version == 2:
         return SendSymphonyMessage(streamId, message)
     else:
-        return SendSymphonyMessageV2(streamId, message, data)
+        return SendSymphonyMessageV2(streamId, message, data, attachments)
 
 
 def SendSymphonyMessage(stream_id: str, message: str):
@@ -44,19 +47,35 @@ def SendSymphonyMessage(stream_id: str, message: str):
     body = { "message": msg, "format": "MESSAGEML"}
 
     response = conn.SymphonyPOST(endpoint, body)
-    return LogMessagePost(response, stream_id, message)
+
+    LogMessagePost(response, stream_id, message)
+
+    return response
 
 
-def SendSymphonyMessageV2(stream_id: str, message: str, data=None):
+def SendSymphonyMessageV2(stream_id: str, message: str, data=None, attachments: List[MessageAttachment]=None):
     msg = util.FormatSymphonyMessage(message)
     endpoint = ep.SendMessage_Endpoint(stream_id, 4)
 
+    bodyObj = { "message": msg }
+
     if data is not None:
         data = json.dumps(data)
+        bodyObj['data'] = data
 
-    bodyObj = { "message": message, "data": data }
+    if attachments:
+        att_list = []
+        for att in attachments:
+            att_t = (att.Filename, att.Data, att.MIME)
+            att_list.append(att_t)
+
+        bodyObj['attachment'] = att_list
+
     response = conn.SymphonyPOSTv2(endpoint, bodyObj)
-    return LogMessagePost(response, stream_id, message)
+
+    LogMessagePost(response, stream_id, message)
+
+    return response
 
 
 def LogMessagePost(response, stream_id: str, message: str=''):
@@ -67,4 +86,3 @@ def LogMessagePost(response, stream_id: str, message: str=''):
         resp = 'Failed to send message | Stream Id: ' + stream_id + ' | Message: ' + message
 
     log.LogConsoleInfo(resp)
-    return resp

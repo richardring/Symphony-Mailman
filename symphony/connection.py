@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta
 import json
 import requests
+from datetime import datetime, timedelta
 from requests_toolbelt import MultipartEncoder
+from typing import List
 
 import botlog as log
 import config

@@ -52,7 +52,6 @@ class Hermes_EmailHandler:
             envelope.mail_options.extend(mail_options)
 
         except email_exc.SymphonyUserLookupException as user_ex:
-            # exceptions.LogException(user_ex)
             log.LogSystemErrorVerbose('Sender is not recognized. Error: ' + str(user_ex))
             return '550 Sender is not recognized. No soup for you.'
         except Exception as ex:
@@ -98,13 +97,18 @@ class Hermes_EmailHandler:
             if config.SaveInboundEmail:
                 store.SaveInboundEmail(mail_from, data)
 
-            hash_val = hash(data)
+            is_dupe = False
+            if config.BlockDuplicateMessages:
+                hash_val = hash(data)
 
-            if hash_val not in SentMessages:
+                if hash_val not in SentMessages:
+                    SentMessages[hash_val] = True
+                else:
+                    is_dupe = True
+                    log.LogConsoleInfoVerbose('___---^^^ Duplicate message suppressed ^^^---___')
+
+            if not is_dupe:
                 proc.ProcessInboundEmail(inbound)
-                SentMessages[hash_val] = True
-            else:
-                log.LogConsoleInfoVerbose('___---^^^ Duplicate message suppressed ^^^---___')
 
         except email_exc.SymphonyEmailBodyParseFailedException as mail_ex:
             # exceptions.LogException(mail_ex)

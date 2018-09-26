@@ -11,3 +11,4 @@ test_client.py
 .gcloudignore
 .gitignore
 logs
+config_dev.json

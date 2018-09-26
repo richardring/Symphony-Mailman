@@ -1,8 +1,14 @@
 import codecs
 import json
 import os
+from pathlib import Path
 
-config_path = os.path.abspath("./config.json")
+config_prod_path = os.path.abspath("./config.json")
+config_dev_path = os.path.abspath("./config_dev.json")
+
+# Ensure I don't accidentally use my dev path on the server
+dev_file = Path(config_dev_path)
+config_path = config_dev_path if dev_file.is_file() else config_prod_path
 
 with codecs.open(config_path, 'r', 'utf-8-sig') as config_json:
     _config = json.load(config_json)
@@ -31,13 +37,21 @@ JWT_PrivateKeyPath = os.path.join(_cert_folder, _config['symphony']['private_key
 # The legacy implementation uses the smtpd library, now deprecated
 # The modern implementation uses the aiosmtpd library: https://github.com/aio-libs/aiosmtpd
 UseLegacySMTPServer = _config['smtp_server']['use_legacy']
+
+BlockDuplicateMessages = _config['smtp_server']['block_duplicate_messages']
+
 SMTPServerHost = _config['smtp_server']['host']
 SMTPServerPort = _config['smtp_server']['port']
 # Debugging Server settings only apply to legacy smtp server
+UseDebuggingServer = _config['smtp_server']['debugging_server']
 SMTPDebugHost = _config['smtp_server']['debug_host']
 SMTPDebugPort = _config['smtp_server']['debug_port']
-UseDebuggingServer = _config['smtp_server']['debugging_server']
+
+# Allow for saving local copies of inbound messages
 SaveInboundEmail = _config['smtp_server']['save_inbound_email']
+SaveInboundPath = _config['smtp_server']['save_inbound_path']
+
+# Email security measures. Not necessary if using a relay
 UseSPFChecking = _config['smtp_server']['use_spf']
 UseDKIMChecking = _config['smtp_server']['use_dkim']
 UseInboundWhitelist = _config['smtp_server']['use_inbound_whitelist']

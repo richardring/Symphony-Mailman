@@ -4,3 +4,4 @@ setup
 *.sqlite
 test_client.py
 logs
+config_dev.json

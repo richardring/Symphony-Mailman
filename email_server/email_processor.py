@@ -70,14 +70,10 @@ def Process(sender: str, recipients: list, email_data):
 
     rcp_list = users.GetRecipients(recipients)
 
-    # This won't be populated.
-    # bounce_list = [rcp.Email for rcp in rcp_list if rcp.Is_Bounced]
     user_ids += [rcp.Id for rcp in rcp_list if not rcp.Is_Bounced and not rcp.Is_Stream]
     stream_ids += [rcp.Id for rcp in rcp_list if not rcp.Is_Bounced and rcp.Is_Stream]
 
-    log.LogConsoleInfoVerbose('Done. Users found: ' + str(len(user_ids)) +
-                              ' Streams found: ' + str(len(stream_ids))) # +
-                              #' Bounced emails: ' + str(len(bounce_list)))
+    log.LogConsoleInfoVerbose('Done. Users found: ' + str(len(user_ids)) + ' Streams found: ' + str(len(stream_ids)))
 
     log.LogConsoleInfoVerbose('Attempting to parse email message...')
     email = parser.ParseEmailMessage(email_data)
@@ -88,15 +84,14 @@ def Process(sender: str, recipients: list, email_data):
         # Send message to each stream
         log.LogConsoleInfoVerbose('Attempting to forward email to stream list...')
         for stream_id in stream_ids:
-            messaging.SendSymphonyMessage(stream_id, email.Body_MML)
+            messaging.SendSymphonyMessageV2(stream_id, email.Body_MML, email.Attachments)
 
         log.LogConsoleInfoVerbose('Attempting to forward email to MIM...')
         # Only attempt to send an IM if there's more than one user, including the sender.
         if user_ids and len(user_ids) > 1:
-            messaging.SendUserIM(user_ids, email.Body_MML)
+            messaging.SendUserIMv2(user_ids, email.Body_MML, email.Attachments)
 
     else:
-        # TODO: Create error email. Note: owing to email security, this will probably have to be sent through GMail
         # Alternatively, I can try to send an IM to the recipient telling them that there was a problem. Maybe
         # that's a better solution. At least if I can identify the sender. Though, if I can't identify
         # the sender, I should probably reject the whole shebang.

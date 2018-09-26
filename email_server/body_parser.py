@@ -7,6 +7,8 @@ import os
 import uuid
 
 import config
+import email_server.models as models
+import exceptions as exc
 
 
 def ParseEmailMessage(email_data):
@@ -57,13 +59,9 @@ class EmailMessage:
             if richest_content.get_content_subtype() == 'html':
                 # parse html message
                 self.Body_HTML_Raw = richest_content.get_content()
-        # If the email has attachments associated with it, it'll be a multipart file
-        # We want to get the body first, so we can deal with parsing the message,
-        # and then deal with the attachments.
-        # TODO: Figure out attachments
-        elif config.ParseAttachments and richest_content.get_content_type == 'multipart/related':
-            self.Body_HTML_Raw = richest_content.get_body(preferencelist=('html')).get_content()
 
+        # Parse attachments
+        if config.ParseAttachments:
             for att_part in richest_content.iter_attachments():
                 att = ParseAttachment(att_part)
 
@@ -74,22 +72,23 @@ class EmailMessage:
 def ParseAttachment(email_attachment):
     try:
         name = email_attachment.get_filename()
+        mime_type = email_attachment.get_content_type()
 
         if name:
             ext = os.path.splitext(email_attachment.get_filename())[1]
         else:
-            ext = mimetypes.guess_extension(email_attachment.get_content_type())
-            name = str(uuid.uuid4())
+            ext = mimetypes.guess_extension(mime_type)
+            name = str(uuid.uuid4()) + '.' + ext
 
         data = email_attachment.get_content()
 
         if data:
-            return MessageAttachment(name, ext, data)
+            return models.MessageAttachment(name, ext, data, mime_type)
 
         return None
 
     except Exception as ex:
-        pass
+        exc.LogException(ex, 'Unable to parse attachment.')
 
 
 def CreateMMLFromText(parsed_email):
@@ -101,10 +100,7 @@ def CreateMMLFromText(parsed_email):
 
     return body
 
-class MessageAttachment:
-    def __init__(self, name, ext, data):
-        self.Filename = name
-        self.Extension = ext
-        self.Data = data
+
+
 
 

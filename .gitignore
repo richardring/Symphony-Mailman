@@ -3,6 +3,7 @@ setup
 *.sqlite
 config.json
 config_old.json
+config_dev.json
 symphony/certs
 .idea
 logs
