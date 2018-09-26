@@ -1,4 +1,8 @@
+from requests.exceptions import HTTPError
+import urllib.parse as u_enc
+
 import botlog as log
+import exceptions as exc
 import symphony.connection as conn
 import symphony.endpoints as ep
 
@@ -6,7 +10,7 @@ import symphony.endpoints as ep
 def LookupUser(user_email: str):
     log.LogConsoleInfoVerbose('Attempting lookup for: ' + user_email)
 
-    endpoint = ep.LookupUser_Endpoint(user_email)
+    endpoint = ep.LookupUser_Endpoint(u_enc.quote_plus(user_email))
     resp = conn.SymphonyGET(endpoint)
 
     # Apparently, if you do a lookup and the system finds no results, instead of
@@ -46,14 +50,19 @@ def LookupUsersByEmail(user_emails: list):
     for user_list in email_buckets:
         endpoint = ep.LookupUserList_Endpoint(user_list)
 
-        response = conn.SymphonyGET(endpoint).json()
+        try:
+            response = conn.SymphonyGET(endpoint).json()
 
-        users = response['users']
-        errors += response['errors']
+            users = response['users']
+            errors += response['errors']
 
-        # Using the union operator to concat each group of users into
-        # the resultant set (thus ensuring each userId only appears once
-        user_ids |= set([str(u['id']) for u in users])
+            # Using the union operator to concat each group of users into
+            # the resultant set (thus ensuring each userId only appears once
+            user_ids |= set([str(u['id']) for u in users])
+
+        # The API throws an HTTP400 when no results are found. Which... I have opinions on.
+        except HTTPError as httpex:
+            exc.LogWebException(httpex, 'Error during user lookup.')
 
     if errors and len(errors) > 0:
         log.LogSystemError('Unable to match some emails')

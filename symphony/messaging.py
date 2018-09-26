@@ -28,15 +28,18 @@ def SendUserIM(userIds: list, message: str, endpoint_version: int=2, data=None,
 
     body = [int(uid) for uid in userIds]
 
+    log.LogConsoleInfoVerbose('Attempting to create MIM...')
     resp = conn.SymphonyPOST(endpoint, body)
 
     response = resp.json()
 
     streamId = response['id']
+    log.LogConsoleInfoVerbose('MIM Stream Id: ' + streamId)
 
     if endpoint_version == 2:
         return SendSymphonyMessage(streamId, message)
     else:
+        log.LogConsoleInfoVerbose('Using v4 Message endpoint...')
         return SendSymphonyMessageV2(streamId, message, data, attachments)
 
 
@@ -57,21 +60,22 @@ def SendSymphonyMessageV2(stream_id: str, message: str, data=None, attachments: 
     msg = util.FormatSymphonyMessage(message)
     endpoint = ep.SendMessage_Endpoint(stream_id, 4)
 
-    bodyObj = { "message": msg }
+    # To send multiple attachments with the same key, we need to use a slighly different
+    # submission format for requests-toolbelt. Instead, the "fields" parameter
+    # that gets passed to the MultipartEncoder should take a list of tuples
+    # for all the parameters.
+    body_list = [('message', msg)]
 
     if data is not None:
         data = json.dumps(data)
-        bodyObj['data'] = data
+        body_list.append(('data', data))
 
     if attachments:
-        att_list = []
         for att in attachments:
             att_t = (att.Filename, att.Data, att.MIME)
-            att_list.append(att_t)
+            body_list.append(('attachment', att_t))
 
-        bodyObj['attachment'] = att_list
-
-    response = conn.SymphonyPOSTv2(endpoint, bodyObj)
+    response = conn.SymphonyPOSTv2(endpoint, body_list)
 
     LogMessagePost(response, stream_id, message)
 

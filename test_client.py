@@ -1,11 +1,17 @@
+import mimetypes
+import os
 import smtplib
 from datetime import datetime
+from email import encoders
 from email.headerregistry import Address
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.message import EmailMessage
 
 import config
 import exceptions
+from email_server.models import MessageAttachment
 import symphony.messaging as messaging
 
 def SendEHLO():
@@ -21,6 +27,46 @@ def SendEHLO():
         print(str(ex))
 
 
+def SendTestWithAttachment():
+    outer = MIMEMultipart('alternative')
+
+    outer['To'] = (Address("Mailman Test Room", "mailman.test.room", "corp.symphony.com"),
+               Address("Kevin", "kevin.mcgrath", "corp.symphony.com"))
+
+    outer['From'] = Address('Ares', "bot.user6", "symphony.com")
+
+    outer['Subject'] = 'Test Message - ' + datetime.now().strftime('%Y%m%d%H%M%S')
+
+    txt = "This is the text part of the message"
+    html = """\
+    <html>
+        <head></head>
+        <body>
+            <p>This is the <b>HTML</b> <i>portion</i> of the message</p>
+        </body>
+    </html>"""
+
+    part1 = MIMEText(txt, 'plain')
+    part2 = MIMEText(html, 'html')
+
+    outer.attach(part1)
+    outer.attach(part2)
+
+    file_path = os.path.abspath("./client/Powershell_Reference.pdf")
+    fp = open(file_path, 'rb')
+    ctype, encoding = mimetypes.guess_type(file_path)
+    maintype, subtype = ctype.split('/', 1)
+    att_msg = MIMEBase(maintype, subtype)
+    att_msg.set_payload(fp.read())
+    fp.close()
+
+    # base64 encode the payload. Christ only knows if Symphony will know what to do with it.
+    encoders.encode_base64(att_msg)
+
+    att_msg.add_header('Content-Disposition', 'attachment', filename="Powershell_Reference.pdf")
+    outer.attach(att_msg)
+
+    SendEmailMessageToServer(outer)
 
 
 def SendTestEmail(valid_sender: bool=True, valid_recipients: bool=True, valid_body: bool=True):
@@ -34,8 +80,11 @@ def SendTestEmail(valid_sender: bool=True, valid_recipients: bool=True, valid_bo
     #    Address("Biz Ops Team", "biz.ops.team", "corp.symphony.com")
     #)
 
-    to_list = (Address("Olympus", "olympus", "corp.symphony.com"),
-                 Address("Kevin", "kevin.mcgrath", "corp.symphony.com"))
+    #to_list = (Address("Olympus", "olympus", "corp.symphony.com"),
+    #             Address("Kevin", "kevin.mcgrath", "corp.symphony.com"))
+
+    to_list = (Address("Kevin", "kevin.mcgrath", "corp.symphony.com"),
+               Address("Mailman Test Room", "mailman_test_room", "corp.symphony.com"))
 
     # This param can take a tuple and then correctly format it for the message send method
     if valid_recipients:
@@ -49,10 +98,9 @@ def SendTestEmail(valid_sender: bool=True, valid_recipients: bool=True, valid_bo
             # Address("Totally fake room jfjlkajslkjf", "totally_fake_room_jfjlkajslkjf", "corp.symphony.com")
         )
 
-
-
     if valid_sender:
-        msg['From'] = Address('Ares', "bot.user6", "symphony.com")
+        # msg['From'] = Address('Ares', "bot.user6", "symphony.com")
+        msg['From'] = Address('Mailman', 'kevin.mcgrath+mailman', 'symphony.com')
     else:
         msg['From'] = Address('Hades', "invalid.user", "symphony.com")
 
@@ -63,13 +111,18 @@ def SendTestEmail(valid_sender: bool=True, valid_recipients: bool=True, valid_bo
     else:
         msg.set_content('')
 
-    server = smtplib.SMTP(config.SMTPServerHost, config.SMTPServerPort)
+    SendEmailMessageToServer(msg)
+
+
+def SendEmailMessageToServer(msg):
+    # server = smtplib.SMTP(config.SMTPServerHost, config.SMTPServerPort)
     # server = smtplib.SMTP('69.253.229.9', 25)
+    server = smtplib.SMTP('192.168.0.190', 25)
     server.set_debuglevel(True)
 
     try:
         server.send_message(msg)
-        server.send_message(msg)
+        # server.send_message(msg)
     except smtplib.SMTPSenderRefused as sender_ex:
         print('Sender refused: ' + str(sender_ex))
     except smtplib.SMTPRecipientsRefused as rcp_ex:
@@ -95,10 +148,62 @@ def SendTestIM():
     # corporate
     # stream_id = "RBdrToHDkKn2V1ArbCtlNn///qohSqxMdA=="
     # preview
-    stream_id = "KRvoQEySsHtyFc1A+6MKjn///p6dRVXFdA=="
+    # Olympus on Corp
+    # stream_id = "KRvoQEySsHtyFc1A+6MKjn///p6dRVXFdA=="
+    # Mailman Test Room on Preview
+    # stream_id = "AbkTBtsN9LcqW6c1/p3vxn///pnpWJS/dA=="
+    stream_id = "oAaMJy8ff_hJIMdgU43jCH___pntjcm-dA"
+    # stream_id = "oAaMJy8ff/hJIMdgU43jCH///pntjcm+dA=="
     msg = "Sending basic test message to Symphony"
 
-    resp = messaging.SendSymphonyMessage(stream_id, msg)
+    u1 = "70368744177761"
+    u2 = "70368744178234"
+
+    uids = [u1, u2]
+
+    body = "<messageML>Forwarded e-mail message from: Mailman (kevin.mcgrath+mailman@symphony.com)<br/>"
+    body += "<b>To</b>: Kevin McGrath (kevin.mcgrath@symphony.com)<br/>"
+    body += "<b>Subject</b>: Test Message - " + datetime.now().strftime('%Y%m%d%H%M%S') + "<br/>"
+    body += "<b>Body</b>: Testing simultaneous forwarding of an email to several users and a room.<br/>"
+    body += "</messageML>"
+
+    # resp = messaging.SendSymphonyMessageV2(stream_id, body)
+    resp = messaging.SendUserIMv2(uids, body)
+    print(resp)
+
+
+def SendTestIMwAtt():
+    # Olympus on Corp
+    # stream_id = "KRvoQEySsHtyFc1A+6MKjn///p6dRVXFdA=="
+    # Mailman Test Room on Preview
+    stream_id = "AbkTBtsN9LcqW6c1/p3vxn///pnpWJS/dA=="
+    msg = "Sending basic test message (with attachments) to Symphony"
+
+    att_obj = MessageAttachment()
+    att_obj.Filename = "Powershell_Reference.pdf"
+    att_obj.Extension = "pdf"
+
+    file_path = os.path.abspath("./client/Powershell_Reference.pdf")
+    fp = open(file_path, 'rb')
+    ctype, encoding = mimetypes.guess_type(file_path)
+    # maintype, subtype = ctype.split('/', 1)
+    att_obj.Data = fp.read()
+    att_obj.MIME = ctype
+    fp.close()
+
+    att_obj2 = MessageAttachment()
+    att_obj2.Filename = "Default_Router_Admin.pdf"
+    att_obj2.Extension = "pdf"
+
+    file_path = os.path.abspath("./client/Default_Router_Admin.pdf")
+    fp = open(file_path, 'rb')
+    ctype, encoding = mimetypes.guess_type(file_path)
+    # maintype, subtype = ctype.split('/', 1)
+    att_obj2.Data = fp.read()
+    att_obj2.MIME = ctype
+    fp.close()
+
+    resp = messaging.SendSymphonyMessageV2(stream_id, msg, None, [att_obj, att_obj2])
     print(resp)
 
 
@@ -122,8 +227,12 @@ def RunClient():
             SendTestEmail(True, True, False)
         elif choice == "5":
             SendEHLO()
+        elif choice == "6":
+            SendTestWithAttachment()
         elif choice == "9":
             SendTestIM()
+        elif choice == "91":
+            SendTestIMwAtt()
         elif choice == "99":
             SendEchoTest()
         elif choice == "0":
@@ -140,7 +249,9 @@ def MenuPrompt():
     prompt += "[3] Send a test email with an invalid recipient \n"
     prompt += "[4] Send a test email with a malformed body \n"
     prompt += "[5] Send an EHLO\n"
+    prompt += "[6] Send a test email with an attachment\n"
     prompt += "[9] Send a test message to Symphony\n"
+    prompt += "[91] Send a test message w/ attachment\n"
     prompt += "[99] Send an echo test\n"
 
     prompt += "[0] Quit\n"

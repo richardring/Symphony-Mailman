@@ -62,7 +62,8 @@ def IdentifyParticipant(r_email: str):
 
     if not rcp:
         rcp = CheckIsUserId(r_email) or CheckIsStreamId(r_email) or CheckIsFullEmail(r_email)\
-            or CheckIsStandardEmail(r_email) or CheckIsRoomName(r_email) or CheckIsUserName(r_email)
+            or CheckIsStandardEmail(r_email) or CheckIsRoomName(r_email)\
+            or SearchUser(r_email) or SearchUser(r_email, local_part_only=True)
 
         if not rcp:
             # If the email address is not found, create a default recipient to be used
@@ -75,11 +76,11 @@ def IdentifyParticipant(r_email: str):
     return rcp
 
 
-def CheckIsUserName(r_email: str):
+def SearchUser(r_email: str, local_part_only: bool=False):
     log.LogConsoleInfoVerbose('S6 - Searching users for ' + r_email)
-    local_part = r_email.split('@')[0]
+    search_param = r_email.split('@')[0] if local_part_only else r_email
 
-    id = users.SearchUsers(local_part)
+    id = users.SearchUsers(search_param)
 
     if id:
         return Recipient(r_email, id, False)
@@ -108,6 +109,7 @@ def CheckIsStandardEmail(r_email: str):
     if config.StandardEmailDomain:
         new_email = local_part + '@' + config.StandardEmailDomain
         log.LogConsoleInfoVerbose('S4.2 - Lookup (standard) for resolved email:  ' + new_email)
+
         id = users.LookupUser(new_email)
 
         if id:
@@ -165,17 +167,18 @@ def CheckIsUserId(r_email: str):
 
 # Step 0
 def CheckCache(r_email: str):
-    log.LogConsoleInfoVerbose('S0 - Checking Cache for ' + r_email)
-    try:
-        id = User_Cache.Get_Id(r_email)
+    if config.UseCache:
+        log.LogConsoleInfoVerbose('S0 - Checking Cache for ' + r_email)
+        try:
+            id = User_Cache.Get_Id(r_email)
 
-        if id:
-            if id.isnumeric():
-                return Recipient(r_email, id, False)
-            elif "___" in id:
-                return Recipient(r_email, id, True)
-    except Exception as ex:
-        exceptions.LogException(ex)
+            if id:
+                if id.isnumeric():
+                    return Recipient(r_email, id, False)
+                elif "___" in id:
+                    return Recipient(r_email, id, True)
+        except Exception as ex:
+            exceptions.LogException(ex)
 
     return None
 

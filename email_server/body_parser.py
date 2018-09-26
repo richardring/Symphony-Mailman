@@ -99,6 +99,7 @@ def CreateMMLFromText(parsed_email):
     body += "</messageML>"
 
     return body
+    # return "<messageML>Message received from Email</messageML>"
 
 
 

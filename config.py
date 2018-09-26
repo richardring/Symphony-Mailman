@@ -8,7 +8,13 @@ config_dev_path = os.path.abspath("./config_dev.json")
 
 # Ensure I don't accidentally use my dev path on the server
 dev_file = Path(config_dev_path)
-config_path = config_dev_path if dev_file.is_file() else config_prod_path
+if dev_file.is_file():
+    config_path = config_dev_path
+    print('Using Dev configuration...')
+else:
+    config_path = config_prod_path
+    print('Using Prod configuration...')
+
 
 with codecs.open(config_path, 'r', 'utf-8-sig') as config_json:
     _config = json.load(config_json)

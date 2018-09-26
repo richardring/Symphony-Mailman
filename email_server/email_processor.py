@@ -82,14 +82,17 @@ def Process(sender: str, recipients: list, email_data):
         log.LogConsoleInfoVerbose('Done. Email subject: ' + email.Subject)
 
         # Send message to each stream
-        log.LogConsoleInfoVerbose('Attempting to forward email to stream list...')
-        for stream_id in stream_ids:
-            messaging.SendSymphonyMessageV2(stream_id, email.Body_MML, email.Attachments)
+        if stream_ids:
+            log.LogConsoleInfoVerbose('Attempting to forward email to stream list...')
+            for stream_id in stream_ids:
+                messaging.SendSymphonyMessageV2(stream_id, email.Body_MML, data=None, attachments=email.Attachments)
+                # messaging.SendSymphonyMessage(stream_id, email.Body_MML)
 
-        log.LogConsoleInfoVerbose('Attempting to forward email to MIM...')
         # Only attempt to send an IM if there's more than one user, including the sender.
         if user_ids and len(user_ids) > 1:
-            messaging.SendUserIMv2(user_ids, email.Body_MML, email.Attachments)
+            log.LogConsoleInfoVerbose('Attempting to forward email to MIM...')
+            messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments)
+            # messaging.SendUserIM(user_ids, email.Body_MML)
 
     else:
         # Alternatively, I can try to send an IM to the recipient telling them that there was a problem. Maybe

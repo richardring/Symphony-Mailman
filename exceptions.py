@@ -29,10 +29,10 @@ def LogWebException(http_ex: requests.exceptions.HTTPError, custom_message: str=
         log.LogSystemErrorVerbose("Response Code: " + str(http_ex.response.status_code))
         log.LogSystemErrorVerbose("Response Message: " + http_ex.response.text)
 
-    LogError(errorStr)
+    LogError(errorStr, suppress_stack_trace=True)
 
 
-def LogError(message):
+def LogError(message, suppress_stack_trace=False):
     exc_type, exc_obj, tb = sys.exc_info()
     f = tb.tb_frame
 
@@ -44,5 +44,7 @@ def LogError(message):
     errorStr = "Exception (" + ex_filename + " [" + str(ex_line_no) + "]" + "): \n" + message
     stackTrace = 'Stack Trace: \n\n' + stack_trace
     log.LogSystemError(errorStr)
-    log.LogSystemErrorVerbose(stackTrace)
+
+    if not suppress_stack_trace:
+        log.LogSystemErrorVerbose(stackTrace)
 
