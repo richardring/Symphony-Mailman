@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import pymongo.errors
 
 import botlog as log
 from email_server.caching.cache import Cache
@@ -20,6 +21,20 @@ class UserCache(Cache):
         self.mongo_client = MongoClient(self._cache_config['conn_str'], serverSelectionTimeoutMS=10)
         self.mongo_db = self.mongo_client[self._cache_config['db_name']]
         self.user_cache = self.mongo_db['user_cache']
+
+    def Test_Conn(self):
+        retVal = False
+        try:
+            cache_item = self.user_cache.find_one()
+            retVal = True
+        except pymongo.errors.ConnectionFailure as conn_ex:
+            exceptions.LogException(conn_ex)
+        except pymongo.errors.ServerSelectionTimeoutError as timeout_ex:
+            exceptions.LogException(timeout_ex)
+        except Exception as ex:
+            exceptions.LogException(ex)
+
+        return retVal
 
     def Get_Id(self, email_address: str) -> str:
         cache_item = self.user_cache.find_one({'email_address': email_address})

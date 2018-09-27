@@ -1,6 +1,6 @@
 import botlog as log
 import config
-from email_server import User_Cache
+from email_server import User_Cache, CacheEnabled
 import exceptions
 import symphony.user as users
 import symphony.chatroom as room
@@ -167,7 +167,7 @@ def CheckIsUserId(r_email: str):
 
 # Step 0
 def CheckCache(r_email: str):
-    if config.UseCache:
+    if config.UseCache and CacheEnabled:
         log.LogConsoleInfoVerbose('S0 - Checking Cache for ' + r_email)
         try:
             id = User_Cache.Get_Id(r_email)
