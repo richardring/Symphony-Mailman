@@ -35,8 +35,12 @@ def SendTestWithAttachment2():
 
     from_addy = Address('Mailman', 'kevin.mcgrath+mailman', 'corp.symphony.com')
 
+    cc_addys = (Address("Mark", "mark.koblenz", "preview.symphony.com"),
+                Address("Miguel", "miguel.clark", "preview.symphony.com"))
+
     msg['From'] = str(from_addy)
     msg['To'] = ', '.join([str(addy) for addy in to_addys])
+    msg['CC'] = ', '.join([str(addy) for addy in cc_addys])
 
     msg['Subject'] = 'Test Message - ' + datetime.now().strftime('%Y%m%d%H%M%S')
 

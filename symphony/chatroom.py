@@ -5,7 +5,6 @@ import symphony.endpoints as ep
 
 
 def SearchRoomByName(room_name: str):
-    log.LogConsoleInfoVerbose('Searching for room ' + room_name)
     endpoint = ep.SearchRoom_Endpoint()
 
     query = room_name.replace('_', ' ').replace('.', ' ').replace('-', ' ').replace('+', ' ')
@@ -16,7 +15,7 @@ def SearchRoomByName(room_name: str):
     response = resp.json()
 
     if response and response['rooms']:
-        log.LogConsoleInfoVerbose('The following rooms were found:')
+        # log.LogConsoleInfoVerbose('The following rooms were found:')
         rooms = response['rooms']
         stream_id = None
 
@@ -26,7 +25,7 @@ def SearchRoomByName(room_name: str):
                 sid = room['roomSystemInfo']['id']
                 name = room['roomAttributes']['name']
 
-                log.LogConsoleInfoVerbose('Room ' + str(index) + ': ' + name + ' (' + sid + ')')
+                # log.LogConsoleInfoVerbose('Room ' + str(index) + ': ' + name + ' (' + sid + ')')
                 index += 1
 
         for room in rooms:

@@ -21,8 +21,6 @@ def LookupUser(user_email: str):
     if resp.status_code == 200:
         response = resp.json()
 
-        log.LogConsoleInfoVerbose('User Lookup Response: ' + str(response))
-
         if response:
             users = response['users']
             errors = response['errors']
@@ -33,7 +31,7 @@ def LookupUser(user_email: str):
                 return id
             elif errors:
                 err = errors[0]['error']
-                log.LogSystemError('Unable to match email: ' + user_email + ' Error: ' + err)
+                # log.LogSystemError('Unable to match email: ' + user_email + ' Error: ' + err)
 
     return None
 
@@ -72,7 +70,6 @@ def LookupUsersByEmail(user_emails: list):
 
 
 def SearchUsers(name_query: str):
-    log.LogConsoleInfoVerbose('Searching for user: ' + name_query)
     endpoint = ep.SearchUser_Endpoint()
     query = name_query.replace('_', ' ').replace('.', ' ').replace('-', ' ').replace('+', ' ')
 
@@ -84,7 +81,6 @@ def SearchUsers(name_query: str):
 
         if response and response['count'] and response['count'] > 0:
             id = str(response['users'][0]['id'])
-            log.LogConsoleInfoVerbose('User found. Id: ' + id)
             return id
 
     return None

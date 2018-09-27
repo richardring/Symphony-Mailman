@@ -24,6 +24,7 @@ class EmailMessage:
         # Might need to figure out how to break these users into objects so I can sep
         # the name from the email
         self.To = parsed_message['to']
+        self.CC = parsed_message['cc']
         self.Subject = parsed_message['subject']
         self.Body_Text = None
         self.Body_HTML_Raw = None
@@ -105,6 +106,11 @@ def CreateMMLFromText(parsed_email):
 
     body = "<messageML>Forwarded e-mail message from: " + from_str + "<br/>"
     body += "<b>To</b>: " + to_str + "<br/>"
+
+    if parsed_email.CC:
+        cc_str = parsed_email.CC.replace('<', '(').replace('>', ')')
+        body += "<b>CC</b>: " + cc_str + "<br/>"
+
     body += "<b>Subject</b>: " + subject + "<br/>"
     body += "<b>Body</b>: " + "<br/>".join(body_str.splitlines())
     body += "</messageML>"

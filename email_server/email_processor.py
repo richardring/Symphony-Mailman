@@ -22,7 +22,11 @@ def ValidateUser(user_email: str):
     rcp = users.GetRecipient(user_email)
 
     if rcp.Is_Bounced:
-        raise exc.SymphonyUserLookupException('Email address could not be identified as a valid user or room.')
+        # I don't want to reject the whole email if one recipient is not found
+        # TODO: send 1-1 error report for sender
+        log.LogSystemErrorVerbose('Unable to idenfity user or room with the email address: ' + user_email)
+        return None
+        # raise exc.SymphonyUserLookupException('Email address could not be identified as a valid user or room.')
 
     log.LogConsoleInfoVerbose('User identified: ' + rcp.Id + ' | Is Room: ' + str(rcp.Is_Stream))
 

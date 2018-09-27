@@ -73,12 +73,13 @@ class Hermes_EmailHandler:
             rcp = proc.ValidateUser(address)
 
             # if the recipient is valid, append the address to the envelope recipients list and return OK
-            envelope.rcpt_tos.append(address)
+            if rcp:
+                envelope.rcpt_tos.append(address)
 
         except email_exc.SymphonyUserLookupException as user_ex:
             # exceptions.LogException(user_ex)
             log.LogSystemErrorVerbose('Recipient not found in Symphony. Error: ' + str(user_ex))
-            return '554 Recipient not recognized'
+            # return '554 Recipient not recognized'
 
         return '250 OK'
 
@@ -131,7 +132,7 @@ def start_server():
         controller.start()
 
         while True:
-            time.sleep(60)
+            time.sleep(5*60)
             log.LogSystemInfo('Heartbeat...ba-dump...')
 
         # Wait for user to press Return
