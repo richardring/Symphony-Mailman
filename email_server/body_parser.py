@@ -99,19 +99,18 @@ def ParseAttachment(email_attachment):
 
 
 def CreateMMLFromText(parsed_email):
-    try:
-        from_str = parsed_email.From.replace('<', '(').replace('>', ')')
-        to_str = parsed_email.To.replace('<', '(').replace('>', ')')
-        subject = parsed_email.Subject if parsed_email.Subject else '(blank)'
-        body_str = parsed_email.Body_Text if parsed_email.Body_Text else '(blank)'
 
-        body = "<messageML>Forwarded e-mail message from: " + from_str + "<br/>"
-        body += "<b>To</b>: " + to_str + "<br/>"
-        body += "<b>Subject</b>: " + subject + "<br/>"
-        body += "<b>Body</b>: " + "<br/>".join(body_str.splitlines())
-        body += "</messageML>"
-    except Exception as ex:
-        exc.LogWebException(ex)
+    from_str = parsed_email.From.replace('<', '(').replace('>', ')')
+    to_str = parsed_email.To.replace('<', '(').replace('>', ')')
+    subject = parsed_email.Subject if parsed_email.Subject else '(blank)'
+    body_str = parsed_email.Body_Text if parsed_email.Body_Text else '(blank)'
+
+    body = "<messageML>Forwarded e-mail message from: " + from_str + "<br/>"
+    body += "<b>To</b>: " + to_str + "<br/>"
+    body += "<b>Subject</b>: " + subject + "<br/>"
+    body += "<b>Body</b>: " + "<br/>".join(body_str.splitlines())
+    body += "</messageML>"
+
 
     return body
 
