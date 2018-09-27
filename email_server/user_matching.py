@@ -71,7 +71,7 @@ def IdentifyParticipant(r_email: str):
             rcp = Recipient(r_email)
 
         # Add value to the cache for future use. Including failed lookups.
-        User_Cache.Insert_Id(r_email, rcp.Id)
+        User_Cache.Insert_Id(r_email, rcp.Id, 'preview')
 
     return rcp
 
