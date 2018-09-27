@@ -1,12 +1,13 @@
 # Based on https://gist.github.com/leonjza/b5043b5602e9222e6760
+import os
 import sqlite3
 
 import botlog as log
-import config
+from email_server.caching.cache import Cache
 import exceptions
 
 
-class EmailCache:
+class UserCache(Cache):
     _create_sql = 'CREATE TABLE IF NOT EXISTS address_cache (email TEXT PRIMARY KEY, sym_id TEXT)'
     _create_index = 'CREATE INDEX IF NOT EXISTS key_index ON address_cache (email)'
     _get_sql = 'SELECT email, sym_id FROM address_cache WHERE email = ?'
@@ -17,15 +18,20 @@ class EmailCache:
 
     conn = None
 
-    def __init__(self):
-        pass
+    def __init__(self, cache_config):
+        # I don't know if this is necessary or not
+        super().__init__(cache_config)
+        self._cache_config = cache_config
 
-    def Get_Conn(self):
+    def Get_Connection(self):
         if self.conn:
             return self.conn
 
         try:
-            db_path = config.CachePath
+            sqlite_file_path = os.path.abspath(self._cache_config['path'])
+            sqlite_filename = self._cache_config['filename']
+
+            db_path = os.path.join(sqlite_file_path, sqlite_filename)
 
             log.LogConsoleInfoVerbose('Establishing SQLite connection to ' + db_path)
             self.conn = sqlite3.Connection(db_path, timeout=60)
@@ -45,8 +51,8 @@ class EmailCache:
         return self.conn
 
     def Get_Id(self, email_address):
-        retval = None
-        with self.Get_Conn() as conn:
+        retval = ''
+        with self.Get_Connection() as conn:
             for row in conn.execute(self._get_sql, (email_address,)):
                 # There should only be one row for each email
                 retval = str(row['sym_id'])
@@ -60,11 +66,11 @@ class EmailCache:
 
     def Update_Id(self, email_address, sym_id):
 
-        with self.Get_Conn() as conn:
+        with self.Get_Connection() as conn:
             conn.execute(self._update_sql, (email_address, sym_id))
 
-    def Insert_Id(self, email_address, sym_id):
-        with self.Get_Conn() as conn:
+    def Insert_Id(self, email_address, sym_id, pod_id):
+        with self.Get_Connection() as conn:
             try:
                 conn.execute(self._insert_sql, (email_address, sym_id))
             except sqlite3.IntegrityError:
@@ -74,7 +80,7 @@ class EmailCache:
                 pass
 
     def Clear_All(self):
-        with self.Get_Conn() as conn:
+        with self.Get_Connection() as conn:
             conn.execute(self._clear_all_sql)
 
     def __del__(self):

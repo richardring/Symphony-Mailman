@@ -71,7 +71,10 @@ RedisPort = _config['redis']['port']
 RedisPassword = _config['redis']['password']
 
 # **************SQLite Cache Settings**************
+CacheConfigs = {}
 UseCache = _config['cache']['use_cache']
-_cache_path = _config['cache']['cache_path']
-_cache_filename = _config['cache']['cache_filename']
-CachePath = os.path.abspath(os.path.join(_cache_path, _cache_filename))
+CacheType = _config['cache']['cache_type']
+_cache_configs = _config['cache']['cache_configs']
+
+for cfg in _cache_configs:
+    CacheConfigs[cfg['type']] = cfg
