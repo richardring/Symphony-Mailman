@@ -30,16 +30,19 @@ class Hermes_EmailHandler:
         try:
             ip_address = session.peer[0]
 
-            result, description = spf.check2(ip_address, address, session.host_name)
-            log.LogConsoleInfoVerbose('SPF Check [' + ip_address + ', ' + address + ', ' + session.host_name +\
+            if config.UseSPFChecking:
+                result, description = spf.check2(ip_address, address, session.host_name)
+                log.LogConsoleInfoVerbose('SPF Check [' + ip_address + ', ' + address + ', ' + session.host_name +\
                                       ' ]: ' + result + ' | ' + description)
 
-            valid_spf = result == 'pass'
-            envelope.spf = valid_spf
+                valid_spf = result == 'pass'
+                envelope.spf = valid_spf
 
-            if config.UseSPFChecking and not valid_spf:
-                log.LogSystemErrorVerbose('SPF Check failed - email rejected.')
-                return '550 SPF validation failed.'
+                if not valid_spf:
+                    log.LogSystemErrorVerbose('SPF Check failed - email rejected.')
+                    return '550 SPF validation failed.'
+            else:
+                envelope.spf = True
 
             if config.UseInboundWhitelist and not whitelist.IsWhitelistedIP(ip_address):
                 log.LogSystemErrorVerbose('Whitelist Check failed - email rejected.')

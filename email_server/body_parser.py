@@ -104,14 +104,14 @@ def CreateMMLFromText(parsed_email):
     subject = parsed_email.Subject if parsed_email.Subject else '(blank)'
     body_str = parsed_email.Body_Text if parsed_email.Body_Text else '(blank)'
 
-    body = "<messageML>Forwarded e-mail message from: " + from_str + "<br/>"
-    body += "<b>To</b>: " + to_str + "<br/>"
+    body = "<messageML>Forwarded e-mail message from: " + from_str + "<br/><br/>"
+    body += "<b>To</b>: " + to_str + "<br/><br/>"
 
     if parsed_email.CC:
         cc_str = parsed_email.CC.replace('<', '(').replace('>', ')')
-        body += "<b>CC</b>: " + cc_str + "<br/>"
+        body += "<b>CC</b>: " + cc_str + "<br/><br/>"
 
-    body += "<b>Subject</b>: " + subject + "<br/>"
+    body += "<b>Subject</b>: " + subject + "<br/><br/>"
     body += "<b>Body</b>: " + "<br/>".join(body_str.splitlines())
     body += "</messageML>"
 
