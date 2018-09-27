@@ -64,6 +64,7 @@ def SendSymphonyMessageV2(stream_id: str, message: str, data=None, attachments: 
     # submission format for requests-toolbelt. Instead, the "fields" parameter
     # that gets passed to the MultipartEncoder should take a list of tuples
     # for all the parameters.
+    # https://github.com/requests/toolbelt/issues/190#issuecomment-319900108
     body_list = [('message', msg)]
 
     if data is not None:

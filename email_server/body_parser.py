@@ -1,6 +1,8 @@
 # https://docs.python.org/3/library/email.examples.html
 from email import message as email_message
 from email import policy
+from email.iterators import typed_subpart_iterator as iter_sub
+from email.iterators import _structure
 from email.parser import BytesParser
 import mimetypes
 import os
@@ -47,9 +49,9 @@ class EmailMessage:
             # and possibly send an error email back to the sender.
             self.IsValid = False
 
-    def ParseEmailContent(self, msg):
+    def ParseEmailContent(self, msg: email_message):
         simplest_content = msg.get_body(preferencelist=('plain', 'html'))
-        richest_content = msg.get_body()
+        richest_content = msg.get_body(preferencelist='html')
 
         if simplest_content and simplest_content.get_content_maintype() == 'text':
             if simplest_content.get_content_subtype() == 'plain':
@@ -60,13 +62,18 @@ class EmailMessage:
                 # parse html message
                 self.Body_HTML_Raw = richest_content.get_content()
 
+        print(_structure(msg))
         # Parse attachments
         if config.ParseAttachments:
-            for att_part in richest_content.iter_attachments():
-                att = ParseAttachment(att_part)
+            for subpart in msg.walk():
+                if subpart.get_content_disposition() == 'attachment':
+                    att = ParseAttachment(subpart)
 
-                if att:
-                    self.Attachments.append(att)
+                    if att:
+                        self.Attachments.append(att)
+
+            if self.Attachments:
+                print('Found ' + str(len(self.Attachments)) + ' attachments.')
 
 
 def ParseAttachment(email_attachment):
@@ -92,14 +99,21 @@ def ParseAttachment(email_attachment):
 
 
 def CreateMMLFromText(parsed_email):
-    body = "<messageML>Forwarded e-mail message from: " + parsed_email.From.replace('<', '(').replace('>', ')') + "<br/>"
-    body += "<b>To</b>: " + parsed_email.To.replace('<', '(').replace('>', ')') + "<br/>"
-    body += "<b>Subject</b>: " + parsed_email.Subject + "<br/>"
-    body += "<b>Body</b>: " + "<br/>".join(parsed_email.Body_Text.splitlines())
-    body += "</messageML>"
+    try:
+        from_str = parsed_email.From.replace('<', '(').replace('>', ')')
+        to_str = parsed_email.To.replace('<', '(').replace('>', ')')
+        subject = parsed_email.Subject if parsed_email.Subject else '(blank)'
+        body_str = parsed_email.Body_Text if parsed_email.Body_Text else '(blank)'
+
+        body = "<messageML>Forwarded e-mail message from: " + from_str + "<br/>"
+        body += "<b>To</b>: " + to_str + "<br/>"
+        body += "<b>Subject</b>: " + subject + "<br/>"
+        body += "<b>Body</b>: " + "<br/>".join(body_str.splitlines())
+        body += "</messageML>"
+    except Exception as ex:
+        exc.LogWebException(ex)
 
     return body
-    # return "<messageML>Message received from Email</messageML>"
 
 
 

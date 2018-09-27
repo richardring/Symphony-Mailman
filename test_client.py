@@ -27,13 +27,56 @@ def SendEHLO():
         print(str(ex))
 
 
+def SendTestWithAttachment2():
+    msg = MIMEMultipart()
+
+    to_addys = (Address("Mailman Test Room", "mailman.test.room", "corp.symphony.com"),
+                 Address("Kevin", "kevin.mcgrath", "corp.symphony.com"))
+
+    from_addy = Address('Mailman', 'kevin.mcgrath+mailman', 'corp.symphony.com')
+
+    msg['From'] = str(from_addy)
+    msg['To'] = ', '.join([str(addy) for addy in to_addys])
+
+    msg['Subject'] = 'Test Message - ' + datetime.now().strftime('%Y%m%d%H%M%S')
+
+    txt = "This is the text part of the message"
+    html = """\
+        <html>
+            <head></head>
+            <body>
+                <p>This is the <b>HTML</b> <i>portion</i> of the message</p>
+            </body>
+        </html>"""
+
+    msg.attach(MIMEText(txt, 'plain'))
+    msg.attach(MIMEText(html, 'html'))
+
+    file_path = os.path.abspath("./client/Powershell_Reference.pdf")
+    fp = open(file_path, 'rb')
+    ctype, encoding = mimetypes.guess_type(file_path)
+    maintype, subtype = ctype.split('/', 1)
+    att_msg = MIMEBase(maintype, subtype)
+    att_msg.set_payload(fp.read())
+    fp.close()
+
+    # base64 encode the payload. Christ only knows if Symphony will know what to do with it.
+    encoders.encode_base64(att_msg)
+    att_msg.add_header('Content-Disposition', 'attachment', filename="Powershell_Reference.pdf")
+
+    msg.attach(att_msg)
+
+    SendEmailMessageToServer(msg)
+
+
 def SendTestWithAttachment():
-    outer = MIMEMultipart('alternative')
+    outer = EmailMessage()  # MIMEMultipart('alternative')
 
     outer['To'] = (Address("Mailman Test Room", "mailman.test.room", "corp.symphony.com"),
                Address("Kevin", "kevin.mcgrath", "corp.symphony.com"))
 
-    outer['From'] = Address('Ares', "bot.user6", "symphony.com")
+    # outer['From'] = Address('Ares', "bot.user6", "symphony.com")
+    outer['From'] = Address('Mailman', 'kevin.mcgrath+mailman', 'corp.symphony.com')
 
     outer['Subject'] = 'Test Message - ' + datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -46,11 +89,15 @@ def SendTestWithAttachment():
         </body>
     </html>"""
 
-    part1 = MIMEText(txt, 'plain')
-    part2 = MIMEText(html, 'html')
+    # Set text content
+    # part1 = MIMEText(txt, 'plain')
+    # outer.attach(part1)
+    outer.set_content(txt)
 
-    outer.attach(part1)
-    outer.attach(part2)
+    # Sent HTML content
+    # part2 = MIMEText(html, 'html')
+    # outer.attach(part2)
+    outer.add_alternative(html)
 
     file_path = os.path.abspath("./client/Powershell_Reference.pdf")
     fp = open(file_path, 'rb')
@@ -228,7 +275,7 @@ def RunClient():
         elif choice == "5":
             SendEHLO()
         elif choice == "6":
-            SendTestWithAttachment()
+            SendTestWithAttachment2()
         elif choice == "9":
             SendTestIM()
         elif choice == "91":
