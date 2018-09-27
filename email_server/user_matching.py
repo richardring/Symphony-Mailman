@@ -77,12 +77,12 @@ def IdentifyParticipant(r_email: str):
 
 
 def SearchUser(r_email: str, local_part_only: bool=False):
-    log.LogConsoleInfoVerbose('S6 - Searching users for ' + r_email)
     search_param = r_email.split('@')[0] if local_part_only else r_email
 
     id = users.SearchUsers(search_param)
 
     if id:
+        log.LogConsoleInfoVerbose('S6 - User Search: ' + search_param + ' matched a valid user.')
         return Recipient(r_email, id, False)
 
     return None
@@ -90,12 +90,12 @@ def SearchUser(r_email: str, local_part_only: bool=False):
 
 # Step 5
 def CheckIsRoomName(r_email: str):
-    log.LogConsoleInfoVerbose('S5 - Checking if ' + r_email + ' is a room name.')
     local_part = r_email.split('@')[0]
 
     stream_id = room.SearchRoomByName(local_part)
 
     if stream_id:
+        log.LogConsoleInfoVerbose('S5 - Room Search: ' + r_email + ' is a room name.')
         return Recipient(r_email, stream_id, True)
 
     return None
@@ -103,24 +103,23 @@ def CheckIsRoomName(r_email: str):
 
 # Step 4
 def CheckIsStandardEmail(r_email: str):
-    log.LogConsoleInfoVerbose('S4.1 - User Lookup (standard) on ' + r_email)
     local_part = r_email.split('@')[0]
 
     if config.StandardEmailDomain:
         new_email = local_part + '@' + config.StandardEmailDomain
-        log.LogConsoleInfoVerbose('S4.2 - Lookup (standard) for resolved email:  ' + new_email)
 
-        id = users.LookupUser(new_email)
+        uid = users.LookupUser(new_email)
 
-        if id:
-            return Recipient(r_email, id, False)
+        if uid:
+            log.LogConsoleInfoVerbose('S4 - API User Lookup (standard):  ' + new_email +
+                                      ' is a valid user email address.')
+            return Recipient(r_email, uid, False)
 
     return None
 
 
 # Step 3
 def CheckIsFullEmail(r_email: str):
-    log.LogConsoleInfoVerbose('S3.1 - User Lookup on ' + r_email)
     new_email = None
     local_part = r_email.split('@')[0]
     domain_list = config.ValidDomains
@@ -134,10 +133,10 @@ def CheckIsFullEmail(r_email: str):
             break
 
     if new_email:
-        log.LogConsoleInfoVerbose('S3.2 - Lookup for resolved email: ' + new_email)
         id = users.LookupUser(new_email)
 
         if id:
+            log.LogConsoleInfoVerbose('S3 - API User Lookup: ' + new_email + ' is a valid user email address.')
             return Recipient(r_email, id, False)
 
     return None
@@ -145,10 +144,10 @@ def CheckIsFullEmail(r_email: str):
 
 # Step 2
 def CheckIsStreamId(r_email: str):
-    log.LogConsoleInfoVerbose('S2 - Checking if ' + r_email + ' contains a stream id.')
     local_part = r_email.split('@')[0]
 
     if "___" in local_part:
+        log.LogConsoleInfoVerbose('S2 - Stream Id: ' + r_email + ' contains a stream id.')
         return Recipient(r_email, local_part, True)
 
     return None
@@ -156,10 +155,10 @@ def CheckIsStreamId(r_email: str):
 
 # Step 1
 def CheckIsUserId(r_email: str):
-    log.LogConsoleInfoVerbose('S1 - Checking if ' + r_email + ' contains a user id.')
     local_part = r_email.split('@')[0]
 
     if local_part.isnumeric():
+        log.LogConsoleInfoVerbose('S1 - User Id: ' + r_email + ' contains a user id.')
         return Recipient(r_email, local_part, False)
 
     return None
@@ -168,14 +167,16 @@ def CheckIsUserId(r_email: str):
 # Step 0
 def CheckCache(r_email: str):
     if config.UseCache and CacheEnabled:
-        log.LogConsoleInfoVerbose('S0 - Checking Cache for ' + r_email)
+
         try:
             id = User_Cache.Get_Id(r_email)
 
             if id:
                 if id.isnumeric():
+                    log.LogConsoleInfoVerbose('S0 - Cache hit (user) for ' + r_email)
                     return Recipient(r_email, id, False)
                 elif "___" in id:
+                    log.LogConsoleInfoVerbose('S0 - Cache hit (room) for ' + r_email)
                     return Recipient(r_email, id, True)
         except Exception as ex:
             exceptions.LogException(ex)

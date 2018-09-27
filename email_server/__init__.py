@@ -11,3 +11,5 @@ elif config.CacheType == 'mongodb':
     User_Cache = mongo.UserCache(config.CacheConfigs['mongodb'])
     log.LogConsoleInfoVerbose('Testing connection to MongoDB...')
     CacheEnabled = User_Cache.Test_Conn()
+    suc = 'succeeded!' if CacheEnabled else 'failed :('
+    log.LogConsoleInfoVerbose('Connection test ' + suc)

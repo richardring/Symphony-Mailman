@@ -62,7 +62,8 @@ class EmailMessage:
                 # parse html message
                 self.Body_HTML_Raw = richest_content.get_content()
 
-        print(_structure(msg))
+        # _structure() gives me the mimetype heirarchy of the message
+        # print(_structure(msg))
         # Parse attachments
         if config.ParseAttachments:
             for subpart in msg.walk():
@@ -71,9 +72,6 @@ class EmailMessage:
 
                     if att:
                         self.Attachments.append(att)
-
-            if self.Attachments:
-                print('Found ' + str(len(self.Attachments)) + ' attachments.')
 
 
 def ParseAttachment(email_attachment):
