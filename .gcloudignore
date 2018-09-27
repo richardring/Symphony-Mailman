@@ -12,3 +12,4 @@ test_client.py
 .gitignore
 logs
 config_dev.json
+archive

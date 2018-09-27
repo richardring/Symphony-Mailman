@@ -28,10 +28,7 @@ class EmailServer(SMTPServer):
 def start_server():
     log.LogConsoleInfo('Starting legacy SMTP server. Press CTRL+C to quit.')
 
-    if config.UseDebuggingServer:
-        server = DebuggingServer((config.SMTPDebugHost, config.SMTPDebugPort), None)
-    else:
-        server = EmailServer((config.SMTPServerHost, config.SMTPServerPort), None)
+    server = EmailServer((config.SMTPServerHost, config.SMTPServerPort), None)
 
     try:
         asyncore.loop()

@@ -40,18 +40,10 @@ JWT_PrivateKeyPath = os.path.join(_cert_folder, _config['symphony']['private_key
 
 
 # **************SMTP Server Settings**************
-# The legacy implementation uses the smtpd library, now deprecated
-# The modern implementation uses the aiosmtpd library: https://github.com/aio-libs/aiosmtpd
-UseLegacySMTPServer = _config['smtp_server']['use_legacy']
-
 BlockDuplicateMessages = _config['smtp_server']['block_duplicate_messages']
 
 SMTPServerHost = _config['smtp_server']['host']
 SMTPServerPort = _config['smtp_server']['port']
-# Debugging Server settings only apply to legacy smtp server
-UseDebuggingServer = _config['smtp_server']['debugging_server']
-SMTPDebugHost = _config['smtp_server']['debug_host']
-SMTPDebugPort = _config['smtp_server']['debug_port']
 
 # Allow for saving local copies of inbound messages
 SaveInboundEmail = _config['smtp_server']['save_inbound_email']
