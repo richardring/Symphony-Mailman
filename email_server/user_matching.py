@@ -71,7 +71,7 @@ def IdentifyParticipant(r_email: str):
             rcp = Recipient(r_email)
 
         # Add value to the cache for future use. Including failed lookups.
-        User_Cache.Insert_Id(r_email, rcp.Id, 'preview')
+        User_Cache.Insert_Id(r_email, rcp.Id, 'preview', rcp.Room_Name)
 
     return rcp
 
@@ -92,11 +92,11 @@ def SearchUser(r_email: str, local_part_only: bool=False):
 def CheckIsRoomName(r_email: str):
     local_part = r_email.split('@')[0]
     log.LogConsoleInfoVerbose('Attempting room search for: ' + local_part)
-    stream_id = room.SearchRoomByName(local_part)
+    stream_id, room_name = room.SearchRoomByName(local_part)
 
     if stream_id:
         log.LogConsoleInfoVerbose('S5 - Room Search: ' + r_email + ' is a room name.')
-        return Recipient(r_email, stream_id, True)
+        return Recipient(r_email, stream_id, True, room_name)
 
     return None
 
@@ -169,7 +169,7 @@ def CheckCache(r_email: str):
     if config.UseCache and CacheEnabled:
 
         try:
-            id = User_Cache.Get_Id(r_email)
+            id, pretty_name = User_Cache.Get_Id(r_email)
 
             if id:
                 if id.isnumeric():
@@ -177,7 +177,7 @@ def CheckCache(r_email: str):
                     return Recipient(r_email, id, False)
                 elif "___" in id:
                     log.LogConsoleInfoVerbose('S0 - Cache hit (room) for ' + r_email)
-                    return Recipient(r_email, id, True)
+                    return Recipient(r_email, id, True, pretty_name)
         except Exception as ex:
             exceptions.LogException(ex)
 
@@ -185,8 +185,9 @@ def CheckCache(r_email: str):
 
 
 class Recipient:
-    def __init__(self, email, id="-1", is_stream=False):
+    def __init__(self, email, id="-1", is_stream=False, room_name=None):
         self.Email = email
         self.Id = id
         self.Is_Stream = is_stream
         self.Is_Bounced = self.Id == "-1"
+        self.Room_Name = room_name

@@ -30,7 +30,7 @@ class EmailMessage:
         self.ToEmailList = []
         self.CCEmailList = []
         self.RecipientList = []
-        self.FromUser = ''
+        self.FromUser = None
         self.ToUsers = []
         self.CCUsers = []
         self.Subject = parsed_message['subject']
@@ -147,21 +147,44 @@ def ParseAttachment(email_attachment):
         exc.LogException(ex, 'Unable to parse attachment.')
 
 
-def CreateMMLFromText(parsed_email):
+def CreateMMLFromText(parsed_email: EmailMessage):
 
     from_str = parsed_email.From.replace('<', '(').replace('>', ')')
     to_str = parsed_email.To.replace('<', '(').replace('>', ')')
     subject = parsed_email.Subject if parsed_email.Subject else '(blank)'
     body_str = parsed_email.Body_Text if parsed_email.Body_Text else '(blank)'
 
+    from_mention = '<mention uid="' + parsed_email.FromUser.Id + '"/>'
+
+    to_mentions = []
+    for rcp in parsed_email.ToUsers:
+        if rcp.Is_Stream and rcp.Room_Name:
+            to_mentions.append(rcp.Room_Name)
+        elif not rcp.Is_Stream and not rcp.Is_Bounced:
+            to_mentions.append('<mention uid="' + rcp.Id + '"/>')
+        else:
+            to_mentions.append(rcp.Email)
+
     # Check that body_str is less than 2500 words
 
-    body = "<messageML>Forwarded e-mail message from: " + from_str + "<br/><br/>"
-    body += "<b>To</b>: " + to_str + "<br/><br/>"
+    body = "<messageML>Forwarded e-mail message from: " + from_mention + "<br/><br/>"
+    body += "<b>To</b>: " + ', '.join(to_mentions) + "<br/><br/>"
 
-    if parsed_email.CC:
-        cc_str = parsed_email.CC.replace('<', '(').replace('>', ')')
-        body += "<b>CC</b>: " + cc_str + "<br/><br/>"
+    # if parsed_email.CC:
+    #     cc_str = parsed_email.CC.replace('<', '(').replace('>', ')')
+    #     body += "<b>CC</b>: " + cc_str + "<br/><br/>"
+
+    if parsed_email.CCUsers:
+        cc_mentions = []
+        for rcp in parsed_email.CCUsers:
+            if rcp.Is_Stream and rcp.Room_Name:
+                cc_mentions.append(rcp.Room_Name)
+            elif not rcp.Is_Stream and not rcp.Is_Bounced:
+                cc_mentions.append('<mention uid="' + rcp.Id + '"/>')
+            else:
+                cc_mentions.append(rcp.Email)
+
+        body += "<b>CC</b>: " + ', '.join(cc_mentions) + "<br/><br/>"
 
     body += "<b>Subject</b>: " + subject + "<br/><br/>"
     body += "<b>Body</b>: " + "<br/>".join(body_str.splitlines())

@@ -18,6 +18,7 @@ def SearchRoomByName(room_name: str):
         # log.LogConsoleInfoVerbose('The following rooms were found:')
         rooms = response['rooms']
         stream_id = None
+        room_name = None
 
         if config.VerboseOutput:
             index = 1
@@ -40,11 +41,12 @@ def SearchRoomByName(room_name: str):
 
             if not stream_id and name.lower().strip() == query.lower().strip():
                 stream_id = sid
+                room_name = name
                 log.LogConsoleInfoVerbose('Selecting ' + name + ' as matched Room. (' + stream_id + ')')
 
                 # TODO: I need to determine if the bot is in the room and if not, I need to join the room first.
                 break
 
-        return stream_id
+        return stream_id, room_name
 
-    return None
+    return None, None

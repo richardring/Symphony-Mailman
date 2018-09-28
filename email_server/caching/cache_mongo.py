@@ -36,22 +36,23 @@ class UserCache(Cache):
 
         return retVal
 
-    def Get_Id(self, email_address: str) -> str:
+    def Get_Id(self, email_address: str):
         cache_item = self.user_cache.find_one({'email_address': email_address})
 
         if cache_item:
-            return cache_item['symphony_id']
+            return cache_item['symphony_id'], cache_item['pretty_name']
 
-        return ''
+        return '',''
 
     def Delete_Id(self, id: str):
         self.user_cache.delete_one({'symphony_id': id})
 
-    def Insert_Id(self, email_address: str, symphony_id: str, pod_id: str):
+    def Insert_Id(self, email_address: str, symphony_id: str, pod_id: str, pretty_name: str=''):
         cache_item = {
             'email_address': email_address,
             'symphony_id': symphony_id,
-            'pod_id': pod_id
+            'pod_id': pod_id,
+            'pretty_name': pretty_name
         }
 
         result = self.user_cache.insert_one(cache_item)
