@@ -13,3 +13,5 @@ elif config.CacheType == 'mongodb':
     CacheEnabled = User_Cache.Test_Conn()
     suc = 'succeeded!' if CacheEnabled else 'failed :('
     log.LogConsoleInfoVerbose('Connection test ' + suc)
+    log.LogConsoleInfoVerbose('Clearing Cache...')
+    User_Cache.Clear_All()

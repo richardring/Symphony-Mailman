@@ -1,8 +1,7 @@
 # https://docs.python.org/3/library/email.examples.html
 from email import message as email_message
 from email import policy
-from email.iterators import typed_subpart_iterator as iter_sub
-from email.iterators import _structure
+# from email.iterators import _structure
 from email.parser import BytesParser
 import mimetypes
 import os
@@ -10,7 +9,9 @@ import uuid
 
 import config
 import email_server.models as models
+import email_server.user_matching as users
 import exceptions as exc
+import email_server.utility as util
 
 
 def ParseEmailMessage(email_data):
@@ -25,6 +26,13 @@ class EmailMessage:
         # the name from the email
         self.To = parsed_message['to']
         self.CC = parsed_message['cc']
+        self.FromEmail = ''
+        self.ToEmailList = []
+        self.CCEmailList = []
+        self.RecipientList = []
+        self.FromUser = ''
+        self.ToUsers = []
+        self.CCUsers = []
         self.Subject = parsed_message['subject']
         self.Body_Text = None
         self.Body_HTML_Raw = None
@@ -32,8 +40,35 @@ class EmailMessage:
         self.Attachments = []
         self.IsValid = True
 
+        self.ParseEmailAddresses()
+        self.UserLookup()
         self.ParseEmailContent(parsed_message)
         self.CreateMessageML()
+
+    def UserLookup(self):
+        self.FromUser = users.GetSingleRecipient(self.FromEmail)
+        self.RecipientList.append(self.FromUser)
+
+        self.ToUsers = users.GetRecipients(self.ToEmailList)
+        self.RecipientList += self.ToUsers
+
+        if self.CCEmailList:
+            self.CCUsers = users.GetRecipients(self.CCEmailList)
+            self.RecipientList += self.CCUsers
+
+    def ParseEmailAddresses(self):
+        if self.From and '<' in self.From:
+            self.FromEmail = self.From.split('<')[1].replace('>', '')
+
+        # self.RecipientList.append(self.FromEmail.lower().strip())
+
+        if self.To:
+            self.ToEmailList = ParseRecipientList(self.To)
+            # self.RecipientList += self.ToEmailList
+
+        if self.CC:
+            self.CCEmailList = ParseRecipientList(self.CC)
+            # self.RecipientList += self.CCEmailList
 
     def CreateMessageML(self):
         if self.Body_HTML_Raw and config.ParseHTML:
@@ -75,6 +110,21 @@ class EmailMessage:
                         self.Attachments.append(att)
 
 
+def ParseRecipientList(address_str: str):
+    ret_list = []
+
+    if address_str:
+        addy_list = address_str.split(',')
+        for rcpt in addy_list:
+            addy = rcpt
+            if '<' in rcpt:
+                addy = rcpt.split('<')[1].replace('>', '')
+
+            ret_list.append(addy.lower().strip())
+
+    return ret_list
+
+
 def ParseAttachment(email_attachment):
     try:
         name = email_attachment.get_filename()
@@ -103,6 +153,8 @@ def CreateMMLFromText(parsed_email):
     to_str = parsed_email.To.replace('<', '(').replace('>', ')')
     subject = parsed_email.Subject if parsed_email.Subject else '(blank)'
     body_str = parsed_email.Body_Text if parsed_email.Body_Text else '(blank)'
+
+    # Check that body_str is less than 2500 words
 
     body = "<messageML>Forwarded e-mail message from: " + from_str + "<br/><br/>"
     body += "<b>To</b>: " + to_str + "<br/><br/>"

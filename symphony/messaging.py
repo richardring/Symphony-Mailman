@@ -84,7 +84,7 @@ def SendSymphonyMessageV2(stream_id: str, message: str, data=None, attachments: 
 
 
 def LogMessagePost(response, stream_id: str, message: str=''):
-    print('API Response: ' + response.text)
+    #print('API Response: ' + response.text)
     if response.status_code == 200:
         resp = 'Sent Message | Stream Id: ' + stream_id + ' | Message: ' + message
     else:

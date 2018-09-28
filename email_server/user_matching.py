@@ -42,7 +42,7 @@ import symphony.chatroom as room
 #       sender with list of unidentifiable email addresses
 
 
-def GetRecipient(user_email):
+def GetSingleRecipient(user_email):
     return IdentifyParticipant(user_email)
 
 
@@ -91,7 +91,7 @@ def SearchUser(r_email: str, local_part_only: bool=False):
 # Step 5
 def CheckIsRoomName(r_email: str):
     local_part = r_email.split('@')[0]
-
+    log.LogConsoleInfoVerbose('Attempting room search for: ' + local_part)
     stream_id = room.SearchRoomByName(local_part)
 
     if stream_id:

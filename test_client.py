@@ -30,13 +30,15 @@ def SendEHLO():
 def SendTestWithAttachment2():
     msg = MIMEMultipart()
 
-    to_addys = (Address("Mailman Test Room", "mailman.test.room", "corp.symphony.com"),
-                 Address("Kevin", "kevin.mcgrath", "corp.symphony.com"))
+    to_addys = (Address("Mailman Test Room", "mailman.test.room", "preview.symphony.com"),
+                Address("Kevin", "kevin.mcgrath", "preview.symphony.com"),
+                Address("catchall", "catch_all", "preview.symphony.com"))
 
-    from_addy = Address('Mailman', 'kevin.mcgrath+mailman', 'corp.symphony.com')
+    from_addy = Address('Mailman', 'kevin.mcgrath+mailman', 'preview.symphony.com')
 
     cc_addys = (Address("Mark", "mark.koblenz", "preview.symphony.com"),
-                Address("Miguel", "miguel.clark", "preview.symphony.com"))
+                Address("SFDC bot", "sfdcbot", "preview.symphony.com"))
+                # Address("Miguel", "miguel.clark", "preview.symphony.com"))
 
     msg['From'] = str(from_addy)
     msg['To'] = ', '.join([str(addy) for addy in to_addys])

@@ -34,7 +34,11 @@ def SearchRoomByName(room_name: str):
             # If one of the rooms has an exact match (when changed to lowercase)
             # use that room.
             # TODO: Decide how to select a room if the match isn't perfect
-            if not stream_id and name.lower() == query:
+            # log.LogConsoleInfoVerbose('Trying Match - query: ' + query + ' room name: ' + name)
+            # log.LogConsoleInfoVerbose('Stream Id: ' + str(stream_id))
+            # log.LogConsoleInfoVerbose('Is match? ' + str(name.lower() == query))
+
+            if not stream_id and name.lower().strip() == query.lower().strip():
                 stream_id = sid
                 log.LogConsoleInfoVerbose('Selecting ' + name + ' as matched Room. (' + stream_id + ')')
 

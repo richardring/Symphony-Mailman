@@ -19,7 +19,7 @@ from email_server.models import InboundMessage
 def ValidateUser(user_email: str):
     log.LogConsoleInfoVerbose('Attempting to validate user email address...')
 
-    rcp = users.GetRecipient(user_email)
+    rcp = users.GetSingleRecipient(user_email)
 
     if rcp.Is_Bounced:
         # I don't want to reject the whole email if one recipient is not found
@@ -65,22 +65,29 @@ def Process(sender: str, recipients: list, email_data):
     # Validated the sender in handler_MAIL. If that passed, the sender
     # is now cached so the lookup is cheap. If it failed, the transaction
     # is cancelled anyway.
-    recipients.append(sender)
+    # recipients.append(sender)
+
+    log.LogConsoleInfoVerbose('Attempting to parse email message...')
+    email = parser.ParseEmailMessage(email_data)
+
+    log.LogConsoleInfoVerbose('Inbound Email Received: ' + 'From: ' + email.From +
+                              ' || To: ' + email.To + ' || CC: ' + str(email.CC))
 
     # @@@@@@@@@@@@@@@ Attempt to identify the recipients @@@@@@@@@@@@@@@
     # I don't think I want to throw an exception if a user or room is not identified,
     # but I probably should send a bounce reply for the failed recipients.
     log.LogConsoleInfoVerbose('Attempting to parse recipients...')
 
-    rcp_list = users.GetRecipients(recipients)
+    # I have to do this a different way. The envelope is modified when the
+    # email is relayed, and I lose the information I was previously receiving
+    # in handle_RCPT. Fortunately, the information is still part of the
+    # email message, which I parse directly.
+    rcp_list = email.RecipientList
 
     user_ids += [rcp.Id for rcp in rcp_list if not rcp.Is_Bounced and not rcp.Is_Stream]
     stream_ids += [rcp.Id for rcp in rcp_list if not rcp.Is_Bounced and rcp.Is_Stream]
 
     log.LogConsoleInfoVerbose('Done. Users found: ' + str(len(user_ids)) + ' Streams found: ' + str(len(stream_ids)))
-
-    log.LogConsoleInfoVerbose('Attempting to parse email message...')
-    email = parser.ParseEmailMessage(email_data)
 
     if email.IsValid:
         log.LogConsoleInfoVerbose('Done. Email subject: ' + email.Subject)
@@ -90,13 +97,11 @@ def Process(sender: str, recipients: list, email_data):
             log.LogConsoleInfoVerbose('Attempting to forward email to stream list...')
             for stream_id in stream_ids:
                 messaging.SendSymphonyMessageV2(stream_id, email.Body_MML, data=None, attachments=email.Attachments)
-                # messaging.SendSymphonyMessage(stream_id, email.Body_MML)
 
         # Only attempt to send an IM if there's more than one user, including the sender.
         if user_ids and len(user_ids) > 1:
             log.LogConsoleInfoVerbose('Attempting to forward email to MIM...')
             messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments)
-            # messaging.SendUserIM(user_ids, email.Body_MML)
 
     else:
         # Alternatively, I can try to send an IM to the recipient telling them that there was a problem. Maybe

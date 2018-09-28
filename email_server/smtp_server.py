@@ -32,8 +32,8 @@ class Hermes_EmailHandler:
 
             if config.UseSPFChecking:
                 result, description = spf.check2(ip_address, address, session.host_name)
-                log.LogConsoleInfoVerbose('SPF Check [' + ip_address + ', ' + address + ', ' + session.host_name +\
-                                      ' ]: ' + result + ' | ' + description)
+                log.LogConsoleInfoVerbose('SPF Check [' + ip_address + ', ' + address + ', ' + session.host_name +
+                                          ' ]: ' + result + ' | ' + description)
 
                 valid_spf = result == 'pass'
                 envelope.spf = valid_spf
@@ -49,6 +49,7 @@ class Hermes_EmailHandler:
                 return '550 Origin blocked.'
 
             # Check that the user is a valid Symphony user or room
+            log.LogSystemInfoVerbose('SMTP MAIL: Checking sender(' + address + ') is valid...')
             sender_rcp = proc.ValidateUser(address)
 
             envelope.mail_from = address
@@ -66,6 +67,9 @@ class Hermes_EmailHandler:
     async def handle_RCPT(self, server: SMTP, session: Session, envelope: Envelope, address: str, rcpt_options: list):
         rcpt_domain = address.split('@')[1]
 
+        log.LogSystemInfoVerbose('SMTP RCPT: Verifying recipient (' + address + ')')
+        log.LogSystemInfoVerbose('SMTP RCPT: Recipient verification is disabled.')
+
         try:
             # reject recipients with domains not found in valid_domains
             if config.ValidDomains and rcpt_domain not in config.ValidDomains:
@@ -73,11 +77,12 @@ class Hermes_EmailHandler:
                 return '550 recipient domain is invalid.'
 
             # Check that the recipient is a valid Symphony user or room
-            rcp = proc.ValidateUser(address)
+            # rcp = proc.ValidateUser(address)
 
             # if the recipient is valid, append the address to the envelope recipients list and return OK
-            if rcp:
-                envelope.rcpt_tos.append(address)
+            #if rcp:
+
+            envelope.rcpt_tos.append(address)
 
         except email_exc.SymphonyUserLookupException as user_ex:
             # exceptions.LogException(user_ex)
@@ -87,6 +92,7 @@ class Hermes_EmailHandler:
         return '250 OK'
 
     async def handle_DATA(self, server: SMTP, session: Session, envelope: Envelope):
+        log.LogSystemInfoVerbose('SMTP DATA: Processing inbound email message.')
         peer = session.peer
         mail_from = envelope.mail_from
         rcpt_tos = envelope.rcpt_tos
@@ -95,7 +101,7 @@ class Hermes_EmailHandler:
         # TODO: Possibly implement DKIM here
         # TODO: aiosmtpd provides a Message class to convert the content into email.message.Message
         inbound = InboundMessage(peer, mail_from, rcpt_tos, data)
-        log.LogConsoleInfoVerbose('Inbound Email Received: ' + 'From: ' + mail_from + ' || To: ' + str(rcpt_tos))
+        # log.LogConsoleInfoVerbose('Inbound Email Received: ' + 'From: ' + mail_from + ' || To: ' + str(rcpt_tos))
 
         try:
             if config.SaveInboundEmail:
