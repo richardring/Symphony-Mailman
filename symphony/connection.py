@@ -1,10 +1,8 @@
 import json
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 from requests_toolbelt import MultipartEncoder
-from typing import List
 
-import botlog as log
 import config
 import exceptions
 import symphony

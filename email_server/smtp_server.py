@@ -30,6 +30,9 @@ class Hermes_EmailHandler:
         try:
             ip_address = session.peer[0]
 
+            if not proc.VerifySymphonyConnection():
+                return '421 Symphony is currently unavailable. Try again later.'
+
             if config.UseSPFChecking:
                 result, description = spf.check2(ip_address, address, session.host_name)
                 log.LogConsoleInfoVerbose('SPF Check [' + ip_address + ', ' + address + ', ' + session.host_name +
@@ -57,7 +60,7 @@ class Hermes_EmailHandler:
 
         except email_exc.SymphonyUserLookupException as user_ex:
             log.LogSystemErrorVerbose('Sender is not recognized. Error: ' + str(user_ex))
-            return '550 Sender is not recognized. No soup for you.'
+            return '550 Sender is not recognized.'
         except Exception as ex:
             exceptions.LogException(ex)
             return '500 Unexpected server malfunction'
@@ -77,16 +80,13 @@ class Hermes_EmailHandler:
                 return '550 recipient domain is invalid.'
 
             # Check that the recipient is a valid Symphony user or room
-            # rcp = proc.ValidateUser(address)
-
             # if the recipient is valid, append the address to the envelope recipients list and return OK
-            #if rcp:
+            # if proc.ValidateUser(address):
 
             envelope.rcpt_tos.append(address)
 
         except email_exc.SymphonyUserLookupException as user_ex:
-            # exceptions.LogException(user_ex)
-            log.LogSystemErrorVerbose('Recipient not found in Symphony. Error: ' + str(user_ex))
+            exceptions.LogException(user_ex, 'Recipient not found in Symphony.')
             # return '554 Recipient not recognized'
 
         return '250 OK'
@@ -105,22 +105,10 @@ class Hermes_EmailHandler:
             if config.SaveInboundEmail:
                 store.SaveInboundEmail(mail_from, data)
 
-            is_dupe = False
-            if config.BlockDuplicateMessages:
-                hash_val = hash(data)
-
-                if hash_val not in SentMessages:
-                    SentMessages[hash_val] = True
-                else:
-                    is_dupe = True
-                    log.LogConsoleInfoVerbose('___---^^^ Duplicate message suppressed ^^^---___')
-
-            if not is_dupe:
-                proc.ProcessInboundEmail(inbound)
+            proc.ProcessInboundEmail(inbound)
 
         except email_exc.SymphonyEmailBodyParseFailedException as mail_ex:
-            # exceptions.LogException(mail_ex)
-            log.LogSystemErrorVerbose('Email content was unreadable or uninteresting. Error: ' + str(mail_ex))
+            exceptions.LogException(mail_ex, 'Email content was unreadable or uninteresting.')
             return '500 Email content was unreadable or uninteresting.'
         except Exception as ex:
             exceptions.LogException(ex)
@@ -147,12 +135,10 @@ def start_server():
                 log.LogSystemInfoVerbose('Heartbeat...ba-dump...')
                 heartbeat_index = 0
 
-        # Wait for user to press Return
         # TODO: Create a better handler for exiting from the server
-        # input('SMTP server is running on dedicated thread. Press Return to stop server and exit. \n\n')
         # controller.stop()
     except Exception as ex:
-        log.LogSystemErrorVerbose(str(ex))
+        exceptions.LogException(ex)
     finally:
         log.LogSystemInfo('Stopping SMTP server...')
         # controller.stop()

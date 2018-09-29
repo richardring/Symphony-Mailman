@@ -173,22 +173,29 @@ def SendEmailMessageToServer(msg):
     server = smtplib.SMTP('192.168.0.190', 25)
     server.set_debuglevel(True)
 
+    smtp_conn_open = True
+
     try:
+
         server.send_message(msg)
         # server.send_message(msg)
     except smtplib.SMTPSenderRefused as sender_ex:
         print('Sender refused: ' + str(sender_ex))
+        smtp_conn_open = False
     except smtplib.SMTPRecipientsRefused as rcp_ex:
         print('Recipient refused: ' + str(rcp_ex))
     except smtplib.SMTPDataError as data_ex:
         print('Data submit error: ' + str(data_ex))
+    except smtplib.SMTPServerDisconnected as disconn_ex:
+        print('STMP server disconnected. ' + str(disconn_ex))
+        smtp_conn_open = False
     except smtplib.SMTPException as smtp_ex:
         print('SMTP error: ' + str(smtp_ex))
     except Exception as ex:
-        exceptions.LogException(ex)
-        # print('Uncaught exception: ' + str(ex))
+        exceptions.LogException(ex, suppress_stack_trace=True)
     finally:
-        server.quit()
+        if smtp_conn_open:
+            server.quit()
 
 
 def SendEchoTest():

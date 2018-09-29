@@ -16,6 +16,11 @@ from email_server.models import InboundMessage
 # Step 4: Extract attachments
 # Step 5: Create an MIM (if necessary) and send message with attachments
 # Step 6: Send message to each room included, with attachments.
+def VerifySymphonyConnection():
+    response = messaging.SendEcho('Test Message')
+    return response.status_code == 200
+
+
 def ValidateUser(user_email: str):
     log.LogConsoleInfoVerbose('Attempting to validate user email address...')
 

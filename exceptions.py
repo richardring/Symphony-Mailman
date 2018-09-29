@@ -5,8 +5,8 @@ import traceback
 import botlog as log
 
 
-def LogException(ex: Exception, custom_message: str=''):
-    LogError(str(ex) + custom_message)
+def LogException(ex: Exception, custom_message: str='', suppress_stack_trace: bool=False):
+    LogError(str(ex) + custom_message, suppress_stack_trace=suppress_stack_trace)
 
 
 def LogRequestException(conn_ex: requests.exceptions.RequestException, custom_message: str=''):
@@ -16,7 +16,7 @@ def LogRequestException(conn_ex: requests.exceptions.RequestException, custom_me
         log.LogSystemErrorVerbose("Response Code: " + str(conn_ex.response.status_code))
         log.LogSystemErrorVerbose("Response Message: " + conn_ex.response.text)
 
-    LogError(errorStr)
+    LogError(errorStr, suppress_stack_trace=True)
 
 
 def LogWebException(http_ex: requests.exceptions.HTTPError, custom_message: str=''):
@@ -41,7 +41,7 @@ def LogError(message, suppress_stack_trace=False):
 
     stack_trace = ''.join(traceback.format_stack())
 
-    errorStr = "Exception (" + ex_filename + " [" + str(ex_line_no) + "]" + "): \n" + message
+    errorStr = "Exception (" + ex_filename + " [" + str(ex_line_no) + "]" + "): " + message
     stackTrace = 'Stack Trace: \n\n' + stack_trace
     log.LogSystemError(errorStr)
 

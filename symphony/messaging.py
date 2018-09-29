@@ -10,12 +10,7 @@ from email_server.models import MessageAttachment
 
 def SendEcho(message: str):
     endpoint = ep.Echo_Endpoint()
-    payload = {
-        "message": message
-    }
-
-    response = conn.SymphonyPOST(endpoint, payload)
-    return LogMessagePost(response, 'echo', message)
+    return conn.SymphonyPOST(endpoint, {"message": message})
 
 
 def SendUserIMv2(userIds: list, message: str, data=None, attachments: List[MessageAttachment]=None):
@@ -47,7 +42,7 @@ def SendSymphonyMessage(stream_id: str, message: str):
     msg = util.FormatSymphonyMessage(message)
     endpoint = ep.SendMessage_Endpoint(stream_id)
 
-    body = { "message": msg, "format": "MESSAGEML"}
+    body = {"message": msg, "format": "MESSAGEML"}
 
     response = conn.SymphonyPOST(endpoint, body)
 
@@ -84,7 +79,6 @@ def SendSymphonyMessageV2(stream_id: str, message: str, data=None, attachments: 
 
 
 def LogMessagePost(response, stream_id: str, message: str=''):
-    #print('API Response: ' + response.text)
     if response.status_code == 200:
         resp = 'Sent Message | Stream Id: ' + stream_id + ' | Message: ' + message
     else:
