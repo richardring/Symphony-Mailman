@@ -134,6 +134,7 @@ class Hermes_EmailHandler:
 def start_server():
     handler = Hermes_EmailHandler()
     controller = Controller(handler, hostname=config.SMTPServerHost, port=config.SMTPServerPort)
+    heartbeat_index = 1
 
     try:
         # Run the event loop in a separate thread
@@ -141,8 +142,12 @@ def start_server():
         controller.start()
 
         while True:
-            time.sleep(5*60)
-            log.LogSystemInfo('Heartbeat...ba-dump...')
+            time.sleep(60)
+            heartbeat_index += 1
+
+            if heartbeat_index == 30:
+                log.LogSystemInfoVerbose('Heartbeat...ba-dump...')
+                heartbeat_index = 0
 
         # Wait for user to press Return
         # TODO: Create a better handler for exiting from the server

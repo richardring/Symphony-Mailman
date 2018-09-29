@@ -42,7 +42,7 @@ class UserCache(Cache):
         if cache_item:
             return cache_item['symphony_id'], cache_item['pretty_name']
 
-        return '',''
+        return '', ''
 
     def Delete_Id(self, id: str):
         self.user_cache.delete_one({'symphony_id': id})

@@ -8,12 +8,14 @@ import exceptions
 
 
 class UserCache(Cache):
-    _create_sql = 'CREATE TABLE IF NOT EXISTS address_cache (email TEXT PRIMARY KEY, sym_id TEXT)'
+    _create_sql = 'CREATE TABLE IF NOT EXISTS address_cache '
+    _create_sql += '(email TEXT PRIMARY KEY, sym_id TEXT, pod_id TEXT, pretty_name TEXT)'
+
     _create_index = 'CREATE INDEX IF NOT EXISTS key_index ON address_cache (email)'
     _get_sql = 'SELECT email, sym_id FROM address_cache WHERE email = ?'
     _del_sql = 'DELETE FROM address_cache WHERE email = ?'
-    _update_sql = 'REPLACE INTO address_cache (email, sym_id) VALUES (?, ?)'
-    _insert_sql = 'INSERT INTO address_cache (email, sym_id) VALUES (?, ?)'
+    _update_sql = 'REPLACE INTO address_cache (email, sym_id, pod_id, pretty_name) VALUES (?, ?, ?, ?)'
+    _insert_sql = 'INSERT INTO address_cache (email, sym_id, pod_id, pretty_name) VALUES (?, ?, ?, ?)'
     _clear_all_sql = 'DELETE FROM address_cache'
 
     conn = None
@@ -51,32 +53,34 @@ class UserCache(Cache):
         return self.conn
 
     def Get_Id(self, email_address):
-        retval = ''
+        user_id = ''
+        pretty_name = ''
         with self.Get_Connection() as conn:
             for row in conn.execute(self._get_sql, (email_address,)):
                 # There should only be one row for each email
-                retval = str(row['sym_id'])
+                user_id = str(row['sym_id'])
+                pretty_name = str(row['pretty_name'])
                 break
 
-        return retval
+        return user_id, pretty_name
 
     def Delete_Id(self, email_address):
         with self.conn as conn:
             conn.execute(self._del_sql, (email_address,))
 
-    def Update_Id(self, email_address, sym_id):
+    def Update_Id(self, email_address: str, sym_id: str, pod_id: str, pretty_name: str=''):
 
         with self.Get_Connection() as conn:
-            conn.execute(self._update_sql, (email_address, sym_id))
+            conn.execute(self._update_sql, (email_address, sym_id, pod_id, pretty_name))
 
-    def Insert_Id(self, email_address, sym_id, pod_id):
+    def Insert_Id(self, email_address: str, sym_id: str, pod_id: str, pretty_name: str=''):
         with self.Get_Connection() as conn:
             try:
-                conn.execute(self._insert_sql, (email_address, sym_id))
+                conn.execute(self._insert_sql, (email_address, sym_id, pod_id, pretty_name))
             except sqlite3.IntegrityError:
                 # attempt to store a duplicate entry
                 log.LogSystemWarn('Attempt to insert an existing email into the cache (' + email_address + ')')
-                self.Update_Id(email_address, sym_id)
+                self.Update_Id(email_address, sym_id, pod_id, pretty_name)
                 pass
 
     def Clear_All(self):
