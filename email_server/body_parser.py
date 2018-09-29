@@ -173,7 +173,7 @@ def CreateMMLFromText(parsed_email: EmailMessage):
 
     # Check that body_str is less than 2500 words
 
-    body = "<messageML>Forwarded e-mail message from: " + from_mention + "<br/><br/>"
+    body = "<messageML>E-mail received from: " + from_mention + "<br/><br/>"
     body += "<b>To</b>: " + ', '.join(to_mentions) + "<br/><br/>"
 
     if parsed_email.CCUsers:
