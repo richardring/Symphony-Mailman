@@ -14,6 +14,8 @@ def AddSentMessage(message: EmailMessage):
 
 
 def ClearExpired():
-    for key, value in _dupe_queue.items():
+    # Don't modify a dictionary while you're looping over it. It'll create a
+    # runtime error.
+    for key, value in _dupe_queue.copy().items():
         if datetime.now() > value:
             del _dupe_queue[key]

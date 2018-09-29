@@ -174,7 +174,7 @@ def CreateMMLFromText(parsed_email: EmailMessage):
     # Check that body_str is less than 2500 words
 
     body = "<messageML>E-mail received from: " + from_mention + "<br/><br/>"
-    body += "<b>To</b>: " + ', '.join(to_mentions) + "<br/><br/>"
+    body += '<b class="tempo-text-color--secondary">To</b>: ' + ', '.join(to_mentions) + "<br/><br/>"
 
     if parsed_email.CCUsers:
         cc_mentions = []
@@ -186,10 +186,12 @@ def CreateMMLFromText(parsed_email: EmailMessage):
             else:
                 cc_mentions.append(rcp.Email)
 
-        body += "<b>CC</b>: " + ', '.join(cc_mentions) + "<br/><br/>"
+        body += '<b class="tempo-text-color--theme-accent">CC</b>: ' + ', '.join(cc_mentions) + "<br/><br/>"
 
-    body += "<b>Subject</b>: " + subject + "<br/><br/>"
-    body += "<b>Body</b>: " + "<br/>".join(body_str.splitlines())
+    body += '<b class="tempo-text-color--theme-accent">Subject</b>: ' + subject + "<br/><br/>"
+
+    msg_body = util.TruncateBodyText(body_str)
+    body += '<b class="tempo-text-color--theme-accent">Message</b>: ' + "<br/>".join(msg_body.splitlines())
     body += "</messageML>"
 
     return body
