@@ -99,9 +99,7 @@ class Hermes_EmailHandler:
         data = envelope.content  # type: bytes
 
         # TODO: Possibly implement DKIM here
-        # TODO: aiosmtpd provides a Message class to convert the content into email.message.Message
         inbound = InboundMessage(peer, mail_from, rcpt_tos, data)
-        # log.LogConsoleInfoVerbose('Inbound Email Received: ' + 'From: ' + mail_from + ' || To: ' + str(rcpt_tos))
 
         try:
             if config.SaveInboundEmail:

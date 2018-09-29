@@ -22,8 +22,6 @@ def ParseEmailMessage(email_data):
 class EmailMessage:
     def __init__(self, parsed_message: email_message):
         self.From = parsed_message['from']
-        # Might need to figure out how to break these users into objects so I can sep
-        # the name from the email
         self.To = parsed_message['to']
         self.CC = parsed_message['cc']
         self.FromEmail = ''
@@ -39,11 +37,15 @@ class EmailMessage:
         self.Body_MML = None
         self.Attachments = []
         self.IsValid = True
+        self.MessageId = ''
+        self.PrimaryBoundary = ''
 
         self.ParseEmailAddresses()
         self.UserLookup()
         self.ParseEmailContent(parsed_message)
         self.CreateMessageML()
+
+        self.Id = util.CreateUniqueId(self)
 
     def UserLookup(self):
         self.FromUser = users.GetSingleRecipient(self.FromEmail)
@@ -60,15 +62,11 @@ class EmailMessage:
         if self.From and '<' in self.From:
             self.FromEmail = self.From.split('<')[1].replace('>', '')
 
-        # self.RecipientList.append(self.FromEmail.lower().strip())
-
         if self.To:
             self.ToEmailList = ParseRecipientList(self.To)
-            # self.RecipientList += self.ToEmailList
 
         if self.CC:
             self.CCEmailList = ParseRecipientList(self.CC)
-            # self.RecipientList += self.CCEmailList
 
     def CreateMessageML(self):
         if self.Body_HTML_Raw and config.ParseHTML:
@@ -86,6 +84,14 @@ class EmailMessage:
             self.IsValid = False
 
     def ParseEmailContent(self, msg: email_message):
+        # ************ Try to create a unique identifier for each message ************
+        if 'message-id' in msg:
+            self.MessageId = msg['message-id']
+            print('Message-Id: ' + self.MessageId)
+
+        self.PrimaryBoundary = msg.get_boundary(failobj='')
+        print('Primary Boundary: ' + self.PrimaryBoundary)
+
         simplest_content = msg.get_body(preferencelist=('plain', 'html'))
         richest_content = msg.get_body(preferencelist='html')
 
@@ -170,10 +176,6 @@ def CreateMMLFromText(parsed_email: EmailMessage):
     body = "<messageML>Forwarded e-mail message from: " + from_mention + "<br/><br/>"
     body += "<b>To</b>: " + ', '.join(to_mentions) + "<br/><br/>"
 
-    # if parsed_email.CC:
-    #     cc_str = parsed_email.CC.replace('<', '(').replace('>', ')')
-    #     body += "<b>CC</b>: " + cc_str + "<br/><br/>"
-
     if parsed_email.CCUsers:
         cc_mentions = []
         for rcp in parsed_email.CCUsers:
@@ -190,10 +192,4 @@ def CreateMMLFromText(parsed_email: EmailMessage):
     body += "<b>Body</b>: " + "<br/>".join(body_str.splitlines())
     body += "</messageML>"
 
-
     return body
-
-
-
-
-
