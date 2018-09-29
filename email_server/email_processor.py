@@ -5,6 +5,7 @@ import symphony.connection as conn
 import symphony.messaging as messaging
 import email_server.body_parser as parser
 import email_server.exceptions as exc
+import email_server.integrity as dupe_c
 import email_server.user_matching as users
 from email_server.models import InboundMessage
 
@@ -54,6 +55,7 @@ def ProcessInboundEmail(message: InboundMessage):
 
 
 # TODO: Implement the Redis async process
+# TODO: Refactor async a bit so just the symphony components are async (keep the dupe checking intact)
 def ProcessAsync(sender: str, recipients: list, email_data, sym_session_token, sym_km_token):
     # Passing the tokens to the redis async process to avoid having to reauthenticate
     # each time a new email comes in.
@@ -67,13 +69,15 @@ def Process(sender: str, recipients: list, email_data):
     user_ids = []
     stream_ids = []
 
-    # Validated the sender in handler_MAIL. If that passed, the sender
-    # is now cached so the lookup is cheap. If it failed, the transaction
-    # is cancelled anyway.
-    # recipients.append(sender)
-
     log.LogConsoleInfoVerbose('Attempting to parse email message...')
     email = parser.ParseEmailMessage(email_data)
+
+    # The parser uses the properties of each email (From:, To:, Subject, content-boundary)
+    # to create a hash for comparison. Once submitted to Symphony, the hash is added to
+    # a dupe_check dictionary for 2 mins. If a duplicate hash is found, the message is not sent.
+    if dupe_c.IsDuplicateMessage(email):
+        log.LogSystemInfoVerbose('Duplicate Messsage suppressed (' + str(email.Id) + ')')
+        return
 
     log.LogConsoleInfoVerbose('Inbound Email Received: ' + 'From: ' + email.From +
                               ' || To: ' + email.To + ' || CC: ' + str(email.CC))
@@ -107,6 +111,10 @@ def Process(sender: str, recipients: list, email_data):
         if user_ids and len(user_ids) > 1:
             log.LogConsoleInfoVerbose('Attempting to forward email to MIM...')
             messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments)
+
+        # Ensure the message is added to the dupe system after submission to Symphony.
+        # TODO: Re-throw exceptions from Sym API. If the messages don't make it, retry? Maybe
+        dupe_c.AddSentMessage(email)
 
     else:
         # Alternatively, I can try to send an IM to the recipient telling them that there was a problem. Maybe

@@ -11,6 +11,7 @@ import exceptions
 import email_server.exceptions as email_exc
 import email_server.email_storage as store
 import email_server.email_processor as proc
+import email_server.integrity as dupe_c
 import email_server.whitelist as whitelist
 from email_server.models import InboundMessage
 
@@ -130,6 +131,8 @@ def start_server():
         while True:
             time.sleep(60)
             heartbeat_index += 1
+
+            dupe_c.ClearExpired()
 
             if heartbeat_index == 30:
                 log.LogSystemInfoVerbose('Heartbeat...ba-dump...')

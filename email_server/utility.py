@@ -17,7 +17,6 @@ def find_nth(haystack, needle, n):
     return start
 
 
-@util.benchmark
 def CreateUniqueId(msg):
     hash_builder = [msg.FromUser.Email]
     hash_builder += [u.Email for u in msg.ToUsers]
@@ -27,6 +26,6 @@ def CreateUniqueId(msg):
     hash_builder.append(msg.PrimaryBoundary)
 
     uid = hash("".join(hash_builder))
-    print('Unique-ish Id: ' + str(uid))
+    # print('Unique-ish Id: ' + str(uid))
 
     return uid

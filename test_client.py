@@ -1,6 +1,8 @@
 import mimetypes
 import os
 import smtplib
+import time
+
 from datetime import datetime
 from email import encoders
 from email.headerregistry import Address
@@ -178,7 +180,16 @@ def SendEmailMessageToServer(msg):
     try:
 
         server.send_message(msg)
-        # server.send_message(msg)
+
+        time.sleep(5)
+
+        print('Sending duplicate message 1')
+        server.send_message(msg)
+
+        time.sleep(5)
+
+        print('Sending duplicate message 2')
+        server.send_message(msg)
     except smtplib.SMTPSenderRefused as sender_ex:
         print('Sender refused: ' + str(sender_ex))
         smtp_conn_open = False

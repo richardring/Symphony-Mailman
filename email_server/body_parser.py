@@ -87,10 +87,10 @@ class EmailMessage:
         # ************ Try to create a unique identifier for each message ************
         if 'message-id' in msg:
             self.MessageId = msg['message-id']
-            print('Message-Id: ' + self.MessageId)
+            # print('Message-Id: ' + self.MessageId)
 
         self.PrimaryBoundary = msg.get_boundary(failobj='')
-        print('Primary Boundary: ' + self.PrimaryBoundary)
+        # print('Primary Boundary: ' + self.PrimaryBoundary)
 
         simplest_content = msg.get_body(preferencelist=('plain', 'html'))
         richest_content = msg.get_body(preferencelist='html')
