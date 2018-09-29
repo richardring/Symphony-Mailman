@@ -25,8 +25,6 @@ def GetAuthToken(endpoint, jwt_token):
         # This needs to be a string, or requests will use the wrong content type
         response = requests.post(endpoint, data=json.dumps(jwt_token))
 
-        print(response.text)
-
         if response.status_code == 200:
             resp_json = json.loads(response.text)
             return resp_json['token']
