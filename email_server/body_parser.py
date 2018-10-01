@@ -160,7 +160,10 @@ def CreateMMLFromText(parsed_email: EmailMessage):
     subject = parsed_email.Subject if parsed_email.Subject else '(blank)'
     body_str = parsed_email.Body_Text if parsed_email.Body_Text else '(blank)'
 
-    from_mention = '<mention uid="' + parsed_email.FromUser.Id + '"/>'
+    if not parsed_email.FromUser.Is_Bounced:
+        from_mention = '<mention uid="' + parsed_email.FromUser.Id + '"/>'
+    else:
+        from_mention = parsed_email.FromUser.Email
 
     to_mentions = []
     for rcp in parsed_email.ToUsers:

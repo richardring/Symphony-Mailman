@@ -36,7 +36,9 @@ def SendTestWithAttachment2():
                 Address("Kevin", "kevin.mcgrath", "preview.symphony.com"),
                 Address("catchall", "catch_all", "preview.symphony.com"))
 
-    from_addy = Address('Mailman', 'kevin.mcgrath+mailman', 'preview.symphony.com')
+    #from_addy = Address('Mailman', 'kevin.mcgrath+mailman', 'preview.symphony.com')
+
+    from_addy = Address('Me', 'kevinmcgr', 'gmail.com')
 
     cc_addys = (Address("Mark", "mark.koblenz", "preview.symphony.com"),
                 Address("SFDC bot", "sfdcbot", "preview.symphony.com"))

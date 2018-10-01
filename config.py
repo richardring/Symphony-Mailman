@@ -54,6 +54,7 @@ UseSPFChecking = _config['smtp_server']['use_spf']
 UseDKIMChecking = _config['smtp_server']['use_dkim']
 UseInboundWhitelist = _config['smtp_server']['use_inbound_whitelist']
 Inbound_Whitelists = _config['inbound_whitelist']
+EnforceSenderRestriction = _config['enforce_sender_restriction']
 
 # **************General Settings**************
 ValidDomains = _config['valid_domains']
