@@ -5,4 +5,5 @@ setup
 test_client.py
 logs
 config_dev.json
+config_prod.json
 archive

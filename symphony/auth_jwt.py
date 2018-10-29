@@ -25,6 +25,8 @@ def GetAuthToken(endpoint, jwt_token):
         # This needs to be a string, or requests will use the wrong content type
         response = requests.post(endpoint, data=json.dumps(jwt_token))
 
+        print(response)
+
         if response.status_code == 200:
             resp_json = json.loads(response.text)
             return resp_json['token']
@@ -68,6 +70,9 @@ def GenerateJWTAuthToken():
     public_key = ''
 
     try:
+        log.LogSystemInfoVerbose('Private key path: ' + config.JWT_PrivateKeyPath)
+        log.LogSystemInfoVerbose('Public key path: ' + config.JWT_PublicKeyPath)
+
         with open(config.JWT_PrivateKeyPath, 'r') as keyfile:
             private_key = keyfile.read()
 
@@ -81,8 +86,8 @@ def GenerateJWTAuthToken():
 
     if private_key:
         encoded = jwt.encode(Payload, private_key, algorithm='RS512', headers=Header)
-        # log.LogConsoleInfoVerbose('encoded key: ')
-        # log.LogConsoleInfoVerbose(encoded)
+        log.LogConsoleInfoVerbose('encoded key: ')
+        log.LogConsoleInfoVerbose(encoded)
         # log.LogConsoleInfoVerbose('Expires on (epoch): ' + str(Payload['exp']))
         log.LogConsoleInfoVerbose('Expires on: ' + datetime.fromtimestamp(Payload['exp']).strftime('%m-%d-%Y %H:%M'))
 

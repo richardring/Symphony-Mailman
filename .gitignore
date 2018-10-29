@@ -5,6 +5,7 @@ setup
 config.json
 config_old.json
 config_dev.json
+config_corp.json
 symphony/certs
 .idea
 logs

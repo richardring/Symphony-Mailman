@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 config_prod_path = os.path.abspath("./config.json")
-config_dev_path = os.path.abspath("./config_dev.json")
+config_dev_path = os.path.abspath("./config_corp.json")
 
 # Ensure I don't accidentally use my dev path on the server
 dev_file = Path(config_dev_path)

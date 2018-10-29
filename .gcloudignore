@@ -12,4 +12,5 @@ test_client.py
 .gitignore
 logs
 config_dev.json
+config_prod.json
 archive
