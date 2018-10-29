@@ -22,6 +22,12 @@ def VerifySymphonyConnection():
     return response.status_code == 200
 
 
+def ValidateSender(sender_email: str):
+    log.LogConsoleInfoVerbose('Attempting to validate sender email address...')
+
+    return users.IdentifySender(sender_email)
+
+
 def ValidateUser(user_email: str):
     log.LogConsoleInfoVerbose('Attempting to validate user email address...')
 

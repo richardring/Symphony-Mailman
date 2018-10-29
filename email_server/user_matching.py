@@ -55,6 +55,19 @@ def GetRecipients(recipient_list):
     return rcp_list
 
 
+# Using a direct check, bypassing the cache and other methods (like room lookup) that
+# do not apply to looking up a sender. I want the sender email address to match
+# exactly to a user on the pod, or have the email rejected.
+def IdentifySender(r_email: str):
+    uid = users.LookupUser(r_email)
+
+    if uid:
+        log.LogConsoleInfoVerbose('Sender Verification - User Lookup: ' + r_email + ' is a valid user email address.')
+        return Recipient(r_email, uid, False)
+
+    return None
+
+
 # Using short-circuiting here to evaluate each step in turn and return the first
 # valid recipient record found
 def IdentifyParticipant(r_email: str):

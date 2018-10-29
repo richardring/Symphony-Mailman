@@ -54,7 +54,7 @@ class Hermes_EmailHandler:
 
             # Check that the user is a valid Symphony user or room
             log.LogSystemInfoVerbose('SMTP MAIL: Checking sender(' + address + ') is valid...')
-            sender_rcp = proc.ValidateUser(address)
+            sender_rcp = proc.ValidateSender(address)  # proc.ValidateUser(address)
 
             if config.EnforceSenderRestriction and not sender_rcp:
                 return '550 Sender is not recognized.'
