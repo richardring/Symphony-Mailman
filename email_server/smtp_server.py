@@ -57,6 +57,7 @@ class Hermes_EmailHandler:
             sender_rcp = proc.ValidateSender(address.lower())  # proc.ValidateUser(address)
 
             if config.EnforceSenderRestriction and not sender_rcp:
+                log.LogSystemErrorVerbose('Sender is not recognized. (' + address + ')')
                 return '550 Sender is not recognized.'
 
             envelope.mail_from = address
