@@ -7,3 +7,9 @@ logs
 config_dev.json
 config_prod.json
 archive
+
+# certs
+*.pem
+
+# obo bundle
+bundle.json

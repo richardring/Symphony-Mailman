@@ -25,7 +25,7 @@ def GetAuthToken(endpoint, jwt_token):
         # This needs to be a string, or requests will use the wrong content type
         response = requests.post(endpoint, data=json.dumps(jwt_token))
 
-        print(response)
+        # print(response)
 
         if response.status_code == 200:
             resp_json = json.loads(response.text)
@@ -86,8 +86,8 @@ def GenerateJWTAuthToken():
 
     if private_key:
         encoded = jwt.encode(Payload, private_key, algorithm='RS512', headers=Header)
-        log.LogConsoleInfoVerbose('encoded key: ')
-        log.LogConsoleInfoVerbose(encoded)
+        # log.LogConsoleInfoVerbose('encoded key: ')
+        # log.LogConsoleInfoVerbose(encoded)
         # log.LogConsoleInfoVerbose('Expires on (epoch): ' + str(Payload['exp']))
         log.LogConsoleInfoVerbose('Expires on: ' + datetime.fromtimestamp(Payload['exp']).strftime('%m-%d-%Y %H:%M'))
 
@@ -111,11 +111,11 @@ def Authenticate():
     log.LogConsoleInfoVerbose('Authenticating with Symphony...')
     symphony.Session_Token = GetAuthToken(ep.SessionAuth_JWT_Endpoint(), jwt_payload)
 
-    # log.LogConsoleInfoVerbose('Session Token: ' + symphony.Session_Token)
+    log.LogConsoleInfoVerbose('Session Token: ' + symphony.Session_Token)
 
     symphony.KM_Token = GetAuthToken(ep.KMAuth_JWT_Endpoint(), jwt_payload)
 
-    # log.LogConsoleInfoVerbose('KM Token: ' + symphony.KM_Token)
+    log.LogConsoleInfoVerbose('KM Token: ' + symphony.KM_Token)
 
     if symphony.KM_Token and symphony.KM_Token != '':
         symphony.Valid_Until = datetime.now() + timedelta(days=10)

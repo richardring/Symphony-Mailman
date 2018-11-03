@@ -219,7 +219,7 @@ def SendEchoTest():
 
 def SendTestIM():
     # corporate (Olympus)
-    stream_id = "RBdrToHDkKn2V1ArbCtlNn___qohSqxMdA"
+    # stream_id = "RBdrToHDkKn2V1ArbCtlNn___qohSqxMdA"
     # preview
     # Olympus on Corp
     # stream_id = "KRvoQEySsHtyFc1A+6MKjn///p6dRVXFdA=="
@@ -229,16 +229,18 @@ def SendTestIM():
     # stream_id = "oAaMJy8ff/hJIMdgU43jCH///pntjcm+dA=="
 
     # Working 10/28/2018 (on Preview)
-    # stream_id = "oAaMJy8ff_hJIMdgU43jCH___pntjcm-dA"
+    stream_id = "oAaMJy8ff_hJIMdgU43jCH___pntjcm-dA"
     msg = "Sending basic test message to Symphony"
 
     # preview users
-    # u1 = "70368744177761"
-    # u2 = "70368744178234"
+    u1 = "70368744177761"  # Kevin (Preview)
+    u2 = "70368744177987"  # Miguel (Preview)
+    u3 = "70368744178234"  # Postmaster (Preview)
+
 
     # corp users
-    u1 = "71811853189474"  # Kevin
-    u2 = "71811853189555"  # Ares
+    # u1 = "71811853189474"  # Kevin
+    # u2 = "71811853189555"  # Ares
 
     uids = [u1, u2]
 

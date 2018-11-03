@@ -23,7 +23,11 @@ def Echo_Endpoint():
 
 
 def CreateIM_Endpoint():
-    return config.SymphonyBaseURL + '/pod/v1/im/create'
+    imEP = config.SymphonyBaseURL + '/pod/v1/'
+    imEP += 'admin/' if config.MIMExcludeBot else ''
+    imEP += 'im/create'
+
+    return imEP
 
 
 def SendMessage_Endpoint(stream_id: str, version: int=2):

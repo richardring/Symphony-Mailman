@@ -9,3 +9,9 @@ config_corp.json
 symphony/certs
 .idea
 logs
+
+# certs
+*.pem
+
+# obo bundle
+bundle.json

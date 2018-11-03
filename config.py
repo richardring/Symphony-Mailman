@@ -65,6 +65,10 @@ LocalUsersOnly = _config['local_users_only']
 StandardEmailDomain = _config['standard_email_domain']
 UserEmailSeparator = _config['user_email_separator']
 
+# This setting allows Postmaster to send an MIM between users without including itself
+# in the MIM. Requires User Provisioning permissions on the POD.
+MIMExcludeBot = _config['mim_exclude_bot']
+
 # **************Redis Settings**************
 UseRedis = _config['redis']['use_redis']
 RedisHost = _config['redis']['host']
