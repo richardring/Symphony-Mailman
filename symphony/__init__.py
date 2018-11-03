@@ -11,3 +11,5 @@ sym_session_v2.cert = config.BotCertificate
 Session_Token = None
 KM_Token = None
 Valid_Until = None
+
+OBO_App_Token = None

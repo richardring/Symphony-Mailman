@@ -18,6 +18,14 @@ def KMAuth_JWT_Endpoint():
     return config.SymphonyAuthBase + '/relay/pubkey/authenticate'
 
 
+def SessionAuth_OBO_App_Endpoint():
+    return config.OBOAuthBase + '/sessionauth/v1/app/authenticate'
+
+
+def SessionAuth_OBO_User_Endpoint(user_id: str):
+    return config.OBOAuthBase + '/sessionauth/v1/app/user/' + user_id + '/authenticate'
+
+
 def Echo_Endpoint():
     return config.SymphonyBaseURL + '/agent/v1/util/echo'
 

@@ -39,6 +39,15 @@ JWT_PublicKeyPath = os.path.join(_cert_folder, _config['symphony']['public_key_f
 JWT_PrivateKeyPath = os.path.join(_cert_folder, _config['symphony']['private_key_filename'])
 
 
+# **************Symphony OBO Settings**************
+UseOnBehalfOf = _config['obo']['use_obo']
+OBOAuthBase = _config['obo']['obo_auth_host'] + ':' + _config['obo']['obo_auth_port']
+_obo_cert_folder = os.path.abspath('./' + _config['obo']['cert_folder'])
+_obo_cert_file_path = os.path.join(_obo_cert_folder, _config['obo']['cert_filename'])
+_obo_key_file_path = os.path.join(_obo_cert_folder, _config['obo']['key_filename'])
+OBOAppCertificate = (_obo_cert_file_path, _obo_key_file_path)
+
+
 # **************SMTP Server Settings**************
 BlockDuplicateMessages = _config['smtp_server']['block_duplicate_messages']
 

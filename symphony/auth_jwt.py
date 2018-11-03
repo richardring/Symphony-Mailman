@@ -48,7 +48,7 @@ def BuildHeaders(sessionToken, keyAuthToken, contentType="application/json"):
         "sessionToken": sessionToken,
         "keyManagerToken": keyAuthToken,
         "Content-Type": contentType,
-        "User-Agent": "HermesBot (Kevin McGrath - BizOps - kevin.mcgrath@symphony.com)"
+        "User-Agent": "Postmaster (Kevin McGrath - BizOps - kevin.mcgrath@symphony.com)"
     }
 
     return RESTheaders
