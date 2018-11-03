@@ -15,4 +15,4 @@ logs
 *.p12
 
 # obo bundle
-"OBO Symphony App"/bundle.json
+bundle.json
