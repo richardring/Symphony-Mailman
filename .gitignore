@@ -12,6 +12,7 @@ logs
 
 # certs
 *.pem
+*.p12
 
 # obo bundle
-bundle.json
+"OBO Symphony App"/bundle.json
