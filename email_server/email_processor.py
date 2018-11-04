@@ -111,22 +111,32 @@ def Process(sender: str, recipients: list, email_data):
         if stream_ids:
             log.LogConsoleInfoVerbose('Attempting to forward email to stream list...')
             for stream_id in stream_ids:
-                messaging.SendSymphonyMessageV2(stream_id, email.Body_MML, data=None, attachments=email.Attachments)
+                if config.UseOnBehalfOf:
+                    messaging.SendSymphonyMessageV2(stream_id, email.Body_MML, data=None, attachments=email.Attachments,
+                                                    obo_user_id=email.FromUser.Id)
+                else:
+                    messaging.SendSymphonyMessageV2(stream_id, email.Body_MML, data=None, attachments=email.Attachments)
 
         # Only attempt to send an IM if there's more than one user, including the sender.
         if user_ids and len(user_ids) > 1:
             log.LogConsoleInfoVerbose('Attempting to forward email to MIM...')
-            messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments)
+
+            if config.UseOnBehalfOf:
+                messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments,
+                                       obo_user_id=email.FromUser.Id)
+            else:
+                messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments)
 
         # Ensure the message is added to the dupe system after submission to Symphony.
         # TODO: Re-throw exceptions from Sym API. If the messages don't make it, retry? Maybe
         dupe_c.AddSentMessage(email)
 
+    elif email.FromUser and email.FromUser.Id:
+        subj = email.Subject if email.Subject else 'Unknown subject'
+        messaging.SendUserIM(email.FromUser.Id, 'Email could not be sent to Symphony. (Subject: ' + subj + ')')
+        log.LogConsoleInfoVerbose('Email was marked invalid. IM sent to From User.')
     else:
-        # Alternatively, I can try to send an IM to the recipient telling them that there was a problem. Maybe
-        # that's a better solution. At least if I can identify the sender. Though, if I can't identify
-        # the sender, I should probably reject the whole shebang.
-        log.LogConsoleInfoVerbose('Done. Email was marked invalid.')
+        log.LogConsoleInfoVerbose('Email was marked invalid.')
         raise exc.SymphonyEmailBodyParseFailedException('Email could not be parsed.')
 
 
