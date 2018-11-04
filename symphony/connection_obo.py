@@ -2,9 +2,8 @@ import json
 import requests
 from requests_toolbelt import MultipartEncoder
 
-import config
 import exceptions
-import symphony
+# import symphony
 import symphony.auth_obo as obo
 
 
