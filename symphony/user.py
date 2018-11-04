@@ -17,7 +17,6 @@ def LookupUser(user_email: str):
     # sending a 200 with an empty array or throwing an error, it sends
     # a 204. What's the point of having an error object included
     # in the specification if you're just going to return a 204?
-    # The point is the platform are a bunch of monkeys.
     if resp.status_code == 200:
         response = resp.json()
 
