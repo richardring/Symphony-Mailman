@@ -12,6 +12,7 @@ import symphony.auth_obo as obo
 def BuildUserHeaders(userSessionToken: str, contentType: str="application/json"):
     RESTheaders = {
         "sessionToken": userSessionToken,
+        "keyManagerToken": symphony.KM_Token,
         "Content-Type": contentType,
         "User-Agent": "Postmaster (Kevin McGrath - BizOps - kevin.mcgrath@symphony.com)"
     }
@@ -19,7 +20,7 @@ def BuildUserHeaders(userSessionToken: str, contentType: str="application/json")
     return RESTheaders
 
 
-def SymphonyPOST_OBO(endpoint: str, body, user_id: str):
+def SymphonyPOST(endpoint: str, body, user_id: str):
     return SymphonyREST('POST', endpoint, json.dumps(body), user_id)
 
 
@@ -36,8 +37,9 @@ def SymphonyREST(method: str, endpoint: str, body, user_id: str):
 
     try:
         user_session_token = obo.AuthenticateUserOBO(user_id)
-        obo_user_headers = BuildUserHeaders(user_session_token)
 
+        print('OBO Session Id: ' + user_session_token)
+        obo_user_headers = BuildUserHeaders(user_session_token)
 
         if method == 'GET':
             response = requests.get(endpoint, headers=obo_user_headers)

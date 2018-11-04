@@ -1,16 +1,21 @@
 import botlog as log
 import config
 import symphony.connection as conn
+import symphony.connection_obo as conn_obo
 import symphony.endpoints as ep
 
 
-def SearchRoomByName(room_name: str):
+def SearchRoomByName(room_name: str, obo_user_id: str=None):
     endpoint = ep.SearchRoom_Endpoint()
 
     query = room_name.replace('_', ' ').replace('.', ' ').replace('-', ' ').replace('+', ' ')
 
     body = {"query": query, "active": True}
-    resp = conn.SymphonyPOST(endpoint, body)
+
+    if obo_user_id:
+        resp = conn_obo.SymphonyPOST(endpoint, body, obo_user_id)
+    else:
+        resp = conn.SymphonyPOST(endpoint, body)
 
     response = resp.json()
 

@@ -14,7 +14,9 @@ from email.message import EmailMessage
 import config
 import exceptions
 from email_server.models import MessageAttachment
+import symphony.connection as conn
 import symphony.messaging as messaging
+import symphony.chatroom as chatroom
 
 def SendEHLO():
     server = smtplib.SMTP('35.237.41.20', 1025)
@@ -290,6 +292,43 @@ def SendTestIMwAtt():
     print(resp)
 
 
+def SendOBOTest():
+
+    conn.Authenticate()
+
+    # obo_user_id = "70368744177761"  # Kevin (preview)
+
+    # u1 = "70368744177987"  # Miguel (Preview)
+    # u2 = "70368744178195"  # Rani (Preview)
+
+    obo_user_id = "347583113330901"  # Kevin (develop)
+
+    u1 = "347583113331377"  # Miguel (develop)
+    u2 = "347583113330829"  # Rani (develop)
+    u3 = "347583113331592"  # Mark (develop)
+
+    stream_id = "P4pJ0vKyVaoK29t41a7px3___pkhmTRNdA"  # Postmaster OBO Test (develop)
+
+
+    body = "<messageML>Forwarded e-mail message from: Postmaster on behalf of "
+    body += '<mention uid="' + obo_user_id +'"/><br/>'
+    body += "<b>To</b>: Miguel Clark (miguel.clark@symphony.com)<br/>"
+    body += "<b>Subject</b>: Test Message - " + datetime.now().strftime('%Y%m%d%H%M%S') + "<br/>"
+    body += "<b>Body</b>: Testing simultaneous forwarding of an email to several users and a room.<br/>"
+    body += "</messageML>"
+
+    resp = messaging.SendUserIMv2([u1, u2], body, obo_user_id=obo_user_id)
+    print(resp)
+
+
+def RoomSearchOBOTest():
+    obo_user_id = "70368744177761"  # Kevin (preview)
+
+    stream_id, room_name = chatroom.SearchRoomByName("Client Supp", obo_user_id=obo_user_id)
+
+    print(stream_id, room_name)
+
+
 def RunClient():
     cli_text = ''
     exit_flag = False
@@ -316,6 +355,10 @@ def RunClient():
             SendTestIM()
         elif choice == "91":
             SendTestIMwAtt()
+        elif choice == "92":
+            SendOBOTest()
+        elif choice == "93":
+            RoomSearchOBOTest()
         elif choice == "99":
             SendEchoTest()
         elif choice == "0":
@@ -335,6 +378,8 @@ def MenuPrompt():
     prompt += "[6] Send a test email with an attachment\n"
     prompt += "[9] Send a test message to Symphony\n"
     prompt += "[91] Send a test message w/ attachment\n"
+    prompt += "[92] Send an OBO test message \n"
+    prompt += "[93] Send an OBO Room Search test\n"
     prompt += "[99] Send an echo test\n"
 
     prompt += "[0] Quit\n"

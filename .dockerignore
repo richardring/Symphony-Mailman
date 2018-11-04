@@ -13,3 +13,6 @@ archive
 
 # obo bundle
 bundle.json
+
+# config files
+config

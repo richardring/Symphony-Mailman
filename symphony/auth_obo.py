@@ -48,10 +48,14 @@ def AuthenticateOBO():
 
 
 def AuthenticateUserOBO(user_id: str):
+    if not symphony.OBO_App_Token:
+        AuthenticateOBO()
+
     endpoint = ep.SessionAuth_OBO_User_Endpoint(user_id)
 
     try:
-        response = requests.post(endpoint, headers=BuildOBOHeaders(symphony.OBO_App_Token))
+        response = requests.post(endpoint, headers=BuildOBOHeaders(symphony.OBO_App_Token),
+                                 cert=config.OBOAppCertificate)
 
         if response.status_code == 200:
             resp_json = json.loads(response.text)

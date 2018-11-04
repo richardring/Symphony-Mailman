@@ -16,3 +16,6 @@ logs
 
 # obo bundle
 bundle.json
+
+# config files
+config
