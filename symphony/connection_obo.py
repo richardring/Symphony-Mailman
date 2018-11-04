@@ -8,11 +8,12 @@ import symphony
 import symphony.auth_obo as obo
 
 
-# This may not be necessary, I'm not sure if the headers will change for RSA
 def BuildUserHeaders(userSessionToken: str, contentType: str="application/json"):
     RESTheaders = {
         "sessionToken": userSessionToken,
-        "keyManagerToken": symphony.KM_Token,
+
+        # Using OBO does not require use of a key manager token
+        # "keyManagerToken": symphony.KM_Token,
         "Content-Type": contentType,
         "User-Agent": "Postmaster (Kevin McGrath - BizOps - kevin.mcgrath@symphony.com)"
     }

@@ -30,9 +30,9 @@ def Echo_Endpoint():
     return config.SymphonyBaseURL + '/agent/v1/util/echo'
 
 
-def CreateIM_Endpoint():
+def CreateIM_Endpoint(exclude_bot: bool = False):
     imEP = config.SymphonyBaseURL + '/pod/v1/'
-    imEP += 'admin/' if config.MIMExcludeBot else ''
+    imEP += 'admin/' if exclude_bot else ''
     imEP += 'im/create'
 
     return imEP

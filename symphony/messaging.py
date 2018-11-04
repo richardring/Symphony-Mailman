@@ -24,35 +24,39 @@ def SendUserIM(userIds: list, message: str, endpoint_version: int=2, data=None,
 
     body = [int(uid) for uid in userIds]
 
+    # obo_user_id must be included in list of users... of course
+    if obo_user_id not in body:
+        body.append(int(obo_user_id))
+
     log.LogConsoleInfoVerbose('Attempting to create MIM...')
 
-    # if obo_user_id:
-        # resp = conn_obo.SymphonyPOST(endpoint, body, obo_user_id)
-    # else:
-    resp = conn.SymphonyPOST(endpoint, body)
+    # We do not need to use an OBO endpoint to create an MIM as long as the
+    # service user has User Provisioning rights.
+    if obo_user_id:
+        resp = conn_obo.SymphonyPOST(endpoint, body, obo_user_id)
+    else:
+        resp = conn.SymphonyPOST(endpoint, body)
 
     response = resp.json()
 
     streamId = response['id']
     log.LogConsoleInfoVerbose('MIM Stream Id: ' + streamId)
 
-    if endpoint_version == 2:
-        return SendSymphonyMessage(streamId, message, obo_user_id=obo_user_id)
+    # OBO cannot use the older send message endpoint
+    if endpoint_version == 2 and obo_user_id is None:
+        return SendSymphonyMessage(streamId, message)
     else:
         log.LogConsoleInfoVerbose('Using v4 Message endpoint...')
         return SendSymphonyMessageV2(streamId, message, data, attachments, obo_user_id=obo_user_id)
 
 
-def SendSymphonyMessage(stream_id: str, message: str, obo_user_id: str=None):
+def SendSymphonyMessage(stream_id: str, message: str):
     msg = util.FormatSymphonyMessage(message)
     endpoint = ep.SendMessage_Endpoint(stream_id)
 
     body = {"message": msg, "format": "MESSAGEML"}
 
-    if obo_user_id:
-        response = conn_obo.SymphonyPOST(endpoint, body, obo_user_id)
-    else:
-        response = conn.SymphonyPOST(endpoint, body)
+    response = conn.SymphonyPOST(endpoint, body)
 
     LogMessagePost(response, stream_id, message)
 

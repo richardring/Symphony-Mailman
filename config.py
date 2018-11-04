@@ -3,8 +3,8 @@ import json
 import os
 from pathlib import Path
 
-config_prod_path = os.path.abspath("./config.json")
-config_dev_path = os.path.abspath("./config_dev.json")
+config_prod_path = os.path.abspath("./config/config.json")
+config_dev_path = os.path.abspath("./config/config_develop.json")
 
 # Ensure I don't accidentally use my dev path on the server
 dev_file = Path(config_dev_path)
@@ -24,8 +24,8 @@ BotUsername = _config['symphony']['bot_username']
 SymphonyBaseURL = _config['symphony']['api_host'] + ':' + _config['symphony']['api_port']
 SymphonyAuthBase = _config['symphony']['auth_host'] + ':' + _config['symphony']['auth_port']
 
-SessionAuthURL = SymphonyAuthBase + '/sessionauth/v1/authenticate'
-KMAuthURL = SymphonyAuthBase + '/keyauth/v1/authenticate'
+# SessionAuthURL = SymphonyAuthBase + '/sessionauth/v1/authenticate'
+# KMAuthURL = SymphonyAuthBase + '/keyauth/v1/authenticate'
 
 _cert_folder = os.path.abspath('./' + _config['symphony']['cert_folder'])
 _cert_file_path = os.path.join(_cert_folder, _config['symphony']['cert_filename'])
@@ -38,7 +38,6 @@ UseLegacyCrypto = _config['symphony']['use_legacy_crypto']
 JWT_PublicKeyPath = os.path.join(_cert_folder, _config['symphony']['public_key_filename'])
 JWT_PrivateKeyPath = os.path.join(_cert_folder, _config['symphony']['private_key_filename'])
 
-
 # **************Symphony OBO Settings**************
 UseOnBehalfOf = _config['obo']['use_obo']
 OBOAuthBase = _config['obo']['obo_auth_host'] + ':' + _config['obo']['obo_auth_port']
@@ -46,7 +45,6 @@ _obo_cert_folder = os.path.abspath('./' + _config['obo']['cert_folder'])
 _obo_cert_file_path = os.path.join(_obo_cert_folder, _config['obo']['cert_filename'])
 _obo_key_file_path = os.path.join(_obo_cert_folder, _config['obo']['key_filename'])
 OBOAppCertificate = (_obo_cert_file_path, _obo_key_file_path)
-
 
 # **************SMTP Server Settings**************
 BlockDuplicateMessages = _config['smtp_server']['block_duplicate_messages']
@@ -73,10 +71,6 @@ ParseAttachments = _config['parse_attachments']
 LocalUsersOnly = _config['local_users_only']
 StandardEmailDomain = _config['standard_email_domain']
 UserEmailSeparator = _config['user_email_separator']
-
-# This setting allows Postmaster to send an MIM between users without including itself
-# in the MIM. Requires User Provisioning permissions on the POD.
-MIMExcludeBot = _config['mim_exclude_bot']
 
 # **************Redis Settings**************
 UseRedis = _config['redis']['use_redis']

@@ -317,7 +317,11 @@ def SendOBOTest():
     body += "<b>Body</b>: Testing simultaneous forwarding of an email to several users and a room.<br/>"
     body += "</messageML>"
 
-    resp = messaging.SendUserIMv2([u1, u2], body, obo_user_id=obo_user_id)
+    resp = messaging.SendUserIMv2([obo_user_id, u1, u2], body, obo_user_id=obo_user_id)
+
+    # This is DEFINITELY working - and does not require the Postmaster KM token
+    # (commented out KM token from connection_obo.py 11/4/2018 7:18am)
+    # resp = messaging.SendSymphonyMessageV2(stream_id, body, obo_user_id=u2)  # obo_user_id
     print(resp)
 
 
