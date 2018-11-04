@@ -26,12 +26,12 @@ def LookupUser(user_email: str):
             errors = response['errors']
 
             if users:
-                id = str(users[0]['id'])
-                log.LogConsoleInfoVerbose('User Id: ' + id)
-                return id
+                uid = str(users[0]['id'])
+                log.LogConsoleInfoVerbose('User Id: ' + uid)
+                return uid
             elif errors:
+                # I don't think they're actually doing this in the API >.>
                 err = errors[0]['error']
-                # log.LogSystemError('Unable to match email: ' + user_email + ' Error: ' + err)
 
     return None
 
