@@ -18,9 +18,6 @@ config_preview.json
 config_corp.json
 archive
 
-# certs
-*.pem
-
 # obo bundle
 bundle.json
 
