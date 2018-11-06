@@ -111,11 +111,11 @@ def Authenticate():
     log.LogConsoleInfoVerbose('Authenticating with Symphony...')
     symphony.Session_Token = GetAuthToken(ep.SessionAuth_JWT_Endpoint(), jwt_payload)
 
-    log.LogConsoleInfoVerbose('Session Token: ' + symphony.Session_Token)
+    # log.LogConsoleInfoVerbose('Session Token: ' + symphony.Session_Token)
 
     symphony.KM_Token = GetAuthToken(ep.KMAuth_JWT_Endpoint(), jwt_payload)
 
-    log.LogConsoleInfoVerbose('KM Token: ' + symphony.KM_Token)
+    # log.LogConsoleInfoVerbose('KM Token: ' + symphony.KM_Token)
 
     if symphony.KM_Token and symphony.KM_Token != '':
         symphony.Valid_Until = datetime.now() + timedelta(days=10)

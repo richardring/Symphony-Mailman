@@ -44,7 +44,7 @@ def AuthenticateOBO():
     log.LogConsoleInfoVerbose('Authenticating OBO App...')
     symphony.OBO_App_Token = GetAuthToken(ep.SessionAuth_OBO_App_Endpoint())
 
-    log.LogConsoleInfoVerbose('OBO App Token: ' + symphony.OBO_App_Token)
+    # log.LogConsoleInfoVerbose('OBO App Token: ' + symphony.OBO_App_Token)
 
 
 def AuthenticateUserOBO(user_id: str):

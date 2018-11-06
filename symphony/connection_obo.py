@@ -38,7 +38,7 @@ def SymphonyREST(method: str, endpoint: str, body, user_id: str):
     try:
         user_session_token = obo.AuthenticateUserOBO(user_id)
 
-        print('OBO Session Id: ' + user_session_token)
+        # print('OBO Session Id: ' + user_session_token)
         obo_user_headers = BuildUserHeaders(user_session_token)
 
         if method == 'GET':
