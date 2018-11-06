@@ -17,6 +17,7 @@ from email_server.models import MessageAttachment
 import symphony.connection as conn
 import symphony.messaging as messaging
 import symphony.chatroom as chatroom
+import symphony.user as user
 
 def SendEHLO():
     server = smtplib.SMTP('35.237.41.20', 1025)
@@ -296,10 +297,21 @@ def SendOBOTest():
 
     conn.Authenticate()
 
-    # obo_user_id = "70368744177761"  # Kevin (preview)
+    obo_user_id_corp = "71811853189403"  # Rani (Corporate)
 
-    # u1 = "70368744177987"  # Miguel (Preview)
-    # u2 = "70368744178195"  # Rani (Preview)
+    u1_corp = "71811853189845"  # Miguel (Corporate)
+    u2_corp = "71811853189403"  # Rani (Corporate)
+    u3_corp = "71811853189474"  # Kevin (Corporate)
+    u4_corp = "71811853189290"  # Mark (Corporate)
+
+    stream_id_corp = "PyhRxVl8jJwqYLyOnDtb2X___qyJ6N2qdA"
+
+    obo_user_id_pre = "70368744177761"  # Kevin (preview)
+
+    u1_pre = "70368744177987"  # Miguel (Preview)
+    u2_pre = "70368744178195"  # Rani (Preview)
+
+    stream_id_pre = "E4Tgra3jtNKw0wl0QjAc33___pnVVEzfdA"
 
     obo_user_id = "347583113330901"  # Kevin (develop)
 
@@ -309,7 +321,6 @@ def SendOBOTest():
 
     stream_id = "P4pJ0vKyVaoK29t41a7px3___pkhmTRNdA"  # Postmaster OBO Test (develop)
 
-
     body = "<messageML>Forwarded e-mail message from: Postmaster on behalf of "
     body += '<mention uid="' + obo_user_id +'"/><br/>'
     body += "<b>To</b>: Miguel Clark (miguel.clark@symphony.com)<br/>"
@@ -317,7 +328,20 @@ def SendOBOTest():
     body += "<b>Body</b>: Testing simultaneous forwarding of an email to several users and a room.<br/>"
     body += "</messageML>"
 
-    resp = messaging.SendUserIMv2([obo_user_id, u1, u2], body, obo_user_id=obo_user_id)
+    # presence test
+
+    # resp_presence = user.SetUserPresence("BUSY", obo_user_id_corp)
+    # resp_presence = user.SetUserPresence("BUSY", obo_user_id_pre)
+    # resp_presence = user.SetUserPresence("BUSY", obo_user_id)
+
+    # print('Presence Response: ' + resp_presence.text)
+
+    # resp = messaging.SendUserIMv2([obo_user_id, u1, u2], body, obo_user_id=obo_user_id)
+
+    # resp = messaging.SendSymphonyMessageV2(stream_id_pre, body, obo_user_id=obo_user_id_pre)
+
+    body_corp = "<messageML>I have to let my true feelings out.</messageML>"
+    resp = messaging.SendSymphonyMessageV2(stream_id_corp, body_corp, obo_user_id=obo_user_id_corp)
 
     # This is DEFINITELY working - and does not require the Postmaster KM token
     # (commented out KM token from connection_obo.py 11/4/2018 7:18am)

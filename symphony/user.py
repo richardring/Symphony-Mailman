@@ -4,6 +4,7 @@ import urllib.parse as u_enc
 import botlog as log
 import exceptions as exc
 import symphony.connection as conn
+import symphony.connection_obo as conn_obo
 import symphony.endpoints as ep
 
 
@@ -109,3 +110,17 @@ def SearchUsersFull(first_name: str = None, last_name: str = None, display_name:
             return str(response['users'][0]['id'])
 
     return None
+
+
+def SetUserPresence(status: str, obo_user_id=None):
+    endpoint = ep.SetPresence_Endpoint()
+
+    body = {"category": status}
+
+    if obo_user_id:
+        resp = conn_obo.SymphonyPOST(endpoint, body, obo_user_id)
+    else:
+        resp = conn.SymphonyPOST(endpoint, body)
+
+    return resp;
+

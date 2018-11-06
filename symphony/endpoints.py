@@ -62,3 +62,7 @@ def FindUser_Endpoint():
 
 def SearchRoom_Endpoint():
     return config.SymphonyBaseURL + '/pod/v3/room/search?limit=5'
+
+
+def SetPresence_Endpoint():
+    return config.SymphonyBaseURL + '/pod/v2/user/presence'

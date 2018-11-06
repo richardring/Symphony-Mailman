@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postmaster-prod-deployment
+  labels:
+    app: postmaster-bot-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postmaster-bot-prod
+  template:
+    metadata:
+      labels:
+        app: postmaster-bot-prod
+    spec:
+      containers:
+      - name: postmaster-bot-prod
+        image: postmaster-bot-prod:latest
+        ports:
+        - containerPort: 25
