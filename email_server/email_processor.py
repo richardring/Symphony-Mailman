@@ -107,7 +107,6 @@ def Process(sender: str, recipients: list, email_data):
     if email.IsValid:
         log.LogConsoleInfoVerbose('Done. Email subject: ' + email.Subject)
 
-        # Send message to each stream
         if stream_ids:
             log.LogConsoleInfoVerbose('Attempting to forward email to stream list...')
             for stream_id in stream_ids:
@@ -117,14 +116,14 @@ def Process(sender: str, recipients: list, email_data):
                 else:
                     messaging.SendSymphonyMessageV2(stream_id, email.Body_MML, data=None, attachments=email.Attachments)
 
-        # Only attempt to send an IM if there's more than one user, including the sender.
-        if user_ids and len(user_ids) > 1:
-            log.LogConsoleInfoVerbose('Attempting to forward email to MIM...')
+        if user_ids:
+            log.LogConsoleInfoVerbose('Attempting to forward email to IM/MIM...')
 
-            if config.UseOnBehalfOf:
+            if len(user_ids) > 1 and config.UseOnBehalfOf:
                 messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments,
                                        obo_user_id=email.FromUser.Id)
             else:
+                # If OBO is disabled or there is only one user (the sender), then create an IM/MIM with Postmaster
                 messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments)
 
         # Ensure the message is added to the dupe system after submission to Symphony.
