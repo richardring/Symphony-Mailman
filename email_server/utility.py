@@ -1,5 +1,20 @@
 # from collections import Counter  # Used to count the _occurence_ of each word
-import utility as util
+from xml.sax.saxutils import escape, quoteattr
+
+def ParseOriginalBodyText(input_text: str) -> str:
+    # Escape <, >, and &
+    output_text = escape(input_text)
+
+    # Escape single and double quotes
+    output_text = quoteattr(output_text)
+
+    # Escape ${
+    output_text = output_text.replace('${', '\$\{')
+
+    # Truncate the body
+    output_text = TruncateBodyText(output_text)
+
+    return output_text
 
 
 def TruncateBodyText(input_text: str) -> str:

@@ -192,7 +192,7 @@ def CreateMMLFromText(parsed_email: EmailMessage):
     body += '<b class="tempo-text-color--theme-accent">Subject</b>: ' + subject + "<br/>"
 
     # Check that body_str is less than 2500 words
-    msg_body = util.TruncateBodyText(body_str)
+    msg_body = util.ParseOriginalBodyText(body_str)
     body += '<b class="tempo-text-color--theme-accent">Message</b>: ' + "<br/>".join(msg_body.splitlines())
     body += "</messageML>"
 
