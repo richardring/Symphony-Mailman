@@ -24,15 +24,15 @@ def SendUserIM(userIds: list, message: str, endpoint_version: int=2, data=None,
 
     body = [int(uid) for uid in userIds]
 
-    # obo_user_id must be included in list of users... of course
-    if obo_user_id not in body:
-        body.append(int(obo_user_id))
-
     log.LogConsoleInfoVerbose('Attempting to create MIM...')
 
     # We do not need to use an OBO endpoint to create an MIM as long as the
     # service user has User Provisioning rights.
     if obo_user_id:
+        # obo_user_id must be included in list of users... of course
+        if obo_user_id not in body:
+            body.append(int(obo_user_id))
+
         resp = conn_obo.SymphonyPOST(endpoint, body, obo_user_id)
     else:
         resp = conn.SymphonyPOST(endpoint, body)

@@ -129,6 +129,17 @@ def SendTestWithAttachment():
     SendEmailMessageToServer(outer)
 
 
+def SendSingleUserTestEmail():
+    msg = EmailMessage()
+    msg['To'] = (Address("Me", "kevin.mcgrath", "corporate.symphony.com"))
+    msg['From'] = Address("Kevin", "kevin.mcgrath", "symphony.com")
+
+    msg['Subject'] = 'Test Message - ' + datetime.now().strftime('%Y%m%d%H%M%S')
+    msg.set_content('Testing simultaneous forwarding of an email to several users and a room.')
+
+    SendEmailMessageToServer(msg)
+
+
 def SendTestEmail(valid_sender: bool=True, valid_recipients: bool=True, valid_body: bool=True):
     # msg = MIMEText('Testing simultaneous forwarding of an email to several users and a room.')
     msg = EmailMessage()
@@ -379,6 +390,8 @@ def RunClient():
             SendEHLO()
         elif choice == "6":
             SendTestWithAttachment2()
+        elif choice == "7":
+            SendSingleUserTestEmail()
         elif choice == "9":
             SendTestIM()
         elif choice == "91":
@@ -404,6 +417,7 @@ def MenuPrompt():
     prompt += "[4] Send a test email with a malformed body \n"
     prompt += "[5] Send an EHLO\n"
     prompt += "[6] Send a test email with an attachment\n"
+    prompt += "[7] Send a test email with a single user\n"
     prompt += "[9] Send a test message to Symphony\n"
     prompt += "[91] Send a test message w/ attachment\n"
     prompt += "[92] Send an OBO test message \n"
