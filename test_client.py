@@ -135,7 +135,13 @@ def SendSingleUserTestEmail():
     msg['From'] = Address("Kevin", "kevin.mcgrath", "symphony.com")
 
     msg['Subject'] = 'Test Message - ' + datetime.now().strftime('%Y%m%d%H%M%S')
-    msg.set_content('Testing simultaneous forwarding of an email to several users and a room.')
+    body = 'Testing sending with only a single user. Including bad characters: \n\n'
+    body += '* Greater Than: >\n'
+    body += '* Less Than: <\n'
+    body += '* Ampersand: &\n'
+    body += '* Single quotes: ' + "How are you? I'm great. 'blue' \n"
+    body += '* Double quotes: "blah blah blah"'
+    msg.set_content(body)
 
     SendEmailMessageToServer(msg)
 

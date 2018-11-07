@@ -6,7 +6,7 @@ def ParseOriginalBodyText(input_text: str) -> str:
     output_text = escape(input_text)
 
     # Escape single and double quotes
-    output_text = quoteattr(output_text)
+    output_text = output_text.replace('"', '&quot;').replace("'", '&apos;')
 
     # Escape ${
     output_text = output_text.replace('${', '\$\{')

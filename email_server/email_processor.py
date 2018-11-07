@@ -120,6 +120,9 @@ def Process(sender: str, recipients: list, email_data):
             if len(user_ids) > 1 and config.UseOnBehalfOf:
                 messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments,
                                        obo_user_id=email.FromUser.Id)
+            elif stream_ids and len(user_ids) == 1:
+                # Do not send a Postmaster 1:1 if the only recipients are rooms and the sender.
+                pass
             else:
                 # If OBO is disabled or there is only one user (the sender), then create an IM/MIM with Postmaster
                 messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments)
