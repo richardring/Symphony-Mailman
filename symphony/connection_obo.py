@@ -49,8 +49,6 @@ def SymphonyREST(method: str, endpoint: str, body, user_id: str):
             encoder = MultipartEncoder(fields=body)
             obo_user_headers = BuildUserHeaders(user_session_token, encoder.content_type)
 
-            # symphony.sym_session_v2.headers.update(headers)
-
             response = requests.post(endpoint, data=encoder, headers=obo_user_headers)
         else:
             raise MethodNotImplementedException(method + ' is not yet implemented.')

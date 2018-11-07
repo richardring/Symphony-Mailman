@@ -72,9 +72,6 @@ def ProcessAsync(sender: str, recipients: list, email_data, sym_session_token, s
 
 
 def Process(sender: str, recipients: list, email_data):
-    user_ids = []
-    stream_ids = []
-
     log.LogConsoleInfoVerbose('Attempting to parse email message...')
     email = parser.ParseEmailMessage(email_data)
 
@@ -99,8 +96,9 @@ def Process(sender: str, recipients: list, email_data):
     # email message, which I parse directly.
     rcp_list = email.RecipientList
 
-    user_ids += [rcp.Id for rcp in rcp_list if not rcp.Is_Bounced and not rcp.Is_Stream]
-    stream_ids += [rcp.Id for rcp in rcp_list if not rcp.Is_Bounced and rcp.Is_Stream]
+    # Convert the list comprehension to a set first to ensure we don't have any duplicate user/stream ids
+    user_ids = list(set([rcp.Id for rcp in rcp_list if not rcp.Is_Bounced and not rcp.Is_Stream]))
+    stream_ids = list(set([rcp.Id for rcp in rcp_list if not rcp.Is_Bounced and rcp.Is_Stream]))
 
     log.LogConsoleInfoVerbose('Done. Users found: ' + str(len(user_ids)) + ' Streams found: ' + str(len(stream_ids)))
 
