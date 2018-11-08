@@ -1,3 +1,5 @@
+import re
+
 import botlog as log
 import config
 import symphony.connection as conn
@@ -5,12 +7,18 @@ import symphony.connection_obo as conn_obo
 import symphony.endpoints as ep
 
 
+def RemoveNonAlpha(input_str: str):
+    pattern = re.compile('[\W_]+')
+    return re.sub(pattern, ' ', input_str.lower().strip())
+
+
 def SearchRoomByName(room_name: str, obo_user_id: str=None):
     endpoint = ep.SearchRoom_Endpoint()
 
-    query = room_name.replace('_', ' ').replace('.', ' ').replace('-', ' ').replace('+', ' ')
+    query = room_name.replace('_', ' ').replace('.', ' ').replace('-', ' ').replace('+', ' ').strip().lower()
+    query = re.sub(' +', ' ', query)
 
-    body = {"query": query, "active": True}
+    body = {"query": query, "active": True, "private": True}
 
     if obo_user_id:
         resp = conn_obo.SymphonyPOST(endpoint, body, obo_user_id)
@@ -44,12 +52,11 @@ def SearchRoomByName(room_name: str, obo_user_id: str=None):
             # log.LogConsoleInfoVerbose('Stream Id: ' + str(stream_id))
             # log.LogConsoleInfoVerbose('Is match? ' + str(name.lower() == query))
 
-            if not stream_id and name.lower().strip() == query.lower().strip():
+            if not stream_id and RemoveNonAlpha(name) == query:
                 stream_id = sid
                 room_name = name
                 log.LogConsoleInfoVerbose('Selecting ' + name + ' as matched Room. (' + stream_id + ')')
 
-                # TODO: I need to determine if the bot is in the room and if not, I need to join the room first.
                 break
 
         return stream_id, room_name

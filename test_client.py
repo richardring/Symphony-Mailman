@@ -1,3 +1,4 @@
+from enum import Enum
 import mimetypes
 import os
 import smtplib
@@ -18,6 +19,69 @@ import symphony.connection as conn
 import symphony.messaging as messaging
 import symphony.chatroom as chatroom
 import symphony.user as user
+
+
+class SymphonyTarget(Enum):
+    DEVELOP = 1
+    PREVIEW = 2
+    CORPORATE = 3
+
+
+from_rcpt_me = Address("Kevin", "kevin.mcgrath", "symphony.com")
+from_rcpt_rani = Address("Rani", "rani.ibrahim", "symphony.com")
+
+to_rcpt = {
+    SymphonyTarget.PREVIEW: (Address("Mailman Test Room", "mailman.test.room", "preview.symphony.com"),
+                             Address("Kevin", "kevin.mcgrath", "preview.symphony.com"),
+                             Address("catchall", "catch_all", "preview.symphony.com")),
+    SymphonyTarget.DEVELOP: (Address("Postmaster OBO Test", "postmaster.obo.test", "develop.symphony.com"),
+                             Address("Kevin", "kevin.mcgrath", "develop.symphony.com")),
+    SymphonyTarget.CORPORATE: (Address("Olympus", "olympus", "corporate.symphony.com"),
+                               Address("Kevin", "kevin.mcgrath", "corporate.symphony.com"),
+                               Address("Rani", "rani.ibrahim", "corporate.symphony.com")),
+}
+
+cc_rcpt = {
+    SymphonyTarget.PREVIEW: (Address("Miguel", "miguel.clark", "preview.symphony.com"),
+                             Address("Mark", "mark.koblenz", "preview.symphony.com")),
+    SymphonyTarget.DEVELOP: (Address("Miguel", "miguel.clark", "develop.symphony.com"),
+                             Address("Mark", "mark.koblenz", "develop.symphony.com")),
+    SymphonyTarget.CORPORATE: (Address("Miguel", "miguel.clark", "corporate.symphony.com"),
+                             Address("Mark", "mark.koblenz", "corporate.symphony.com")),
+}
+
+symphony_user_ids = {
+    SymphonyTarget.PREVIEW: [{"name": "Miguel", "id": "70368744177987"},
+                             {"name": "Rani", "id": "70368744178195"},
+                             {"name": "Kevin", "id": "70368744177761"}],
+    SymphonyTarget.DEVELOP: [{"name": "Miguel", "id": "347583113331377"},
+                             {"name": "Rani", "id": "347583113330829"},
+                             {"name": "Kevin", "id": "347583113330901"},
+                             {"name": "Mark", "id": "347583113331592"}],
+    SymphonyTarget.CORPORATE: [{"name": "Miguel", "id": "71811853189845"},
+                             {"name": "Rani", "id": "71811853189403"},
+                             {"name": "Kevin", "id": "71811853189474"},
+                             {"name": "Mark", "id": "71811853189290"}],
+}
+
+stream_ids = {
+    SymphonyTarget.PREVIEW: {"name": "Client Support", "id": "E4Tgra3jtNKw0wl0QjAc33___pnVVEzfdA",
+                             "email": "client.support@preview.symphony.com"},
+    SymphonyTarget.DEVELOP: {"name": "Postmaster OBO Test", "id": "P4pJ0vKyVaoK29t41a7px3___pkhmTRNdA",
+                             "email": "postmaster.obo.test@develop.symphony.com"},
+    SymphonyTarget.CORPORATE: {"name": "Olympus", "id": "RBdrToHDkKn2V1ArbCtlNn___qohSqxMdA",
+                               "email": "olympus@corporate.symphony.com"}
+}
+
+
+def GetCurrentConfigType():
+    if 'config_preview.json' in config.config_path:
+        return SymphonyTarget.PREVIEW
+    elif 'config_corp.json' in config.config_path:
+        return SymphonyTarget.CORPORATE
+    else:
+        return SymphonyTarget.DEVELOP
+
 
 def SendEHLO():
     server = smtplib.SMTP('35.237.41.20', 1025)
@@ -82,113 +146,78 @@ def SendTestWithAttachment2():
     SendEmailMessageToServer(msg)
 
 
-def SendTestWithAttachment():
-    outer = EmailMessage()  # MIMEMultipart('alternative')
-
-    outer['To'] = (Address("Mailman Test Room", "mailman.test.room", "corp.symphony.com"),
-               Address("Kevin", "kevin.mcgrath", "corp.symphony.com"))
-
-    # outer['From'] = Address('Ares', "bot.user6", "symphony.com")
-    outer['From'] = Address('Mailman', 'kevin.mcgrath+mailman', 'corp.symphony.com')
-
-    outer['Subject'] = 'Test Message - ' + datetime.now().strftime('%Y%m%d%H%M%S')
-
-    txt = "This is the text part of the message"
-    html = """\
-    <html>
-        <head></head>
-        <body>
-            <p>This is the <b>HTML</b> <i>portion</i> of the message</p>
-        </body>
-    </html>"""
-
-    # Set text content
-    # part1 = MIMEText(txt, 'plain')
-    # outer.attach(part1)
-    outer.set_content(txt)
-
-    # Sent HTML content
-    # part2 = MIMEText(html, 'html')
-    # outer.attach(part2)
-    outer.add_alternative(html)
-
-    file_path = os.path.abspath("./client/Powershell_Reference.pdf")
-    fp = open(file_path, 'rb')
-    ctype, encoding = mimetypes.guess_type(file_path)
-    maintype, subtype = ctype.split('/', 1)
-    att_msg = MIMEBase(maintype, subtype)
-    att_msg.set_payload(fp.read())
-    fp.close()
-
-    # base64 encode the payload. Christ only knows if Symphony will know what to do with it.
-    encoders.encode_base64(att_msg)
-
-    att_msg.add_header('Content-Disposition', 'attachment', filename="Powershell_Reference.pdf")
-    outer.attach(att_msg)
-
-    SendEmailMessageToServer(outer)
 
 
-def SendSingleUserTestEmail():
-    msg = EmailMessage()
-    msg['To'] = (Address("Me", "kevin.mcgrath", "corporate.symphony.com"))
-    msg['From'] = Address("Kevin", "kevin.mcgrath", "symphony.com")
 
-    msg['Subject'] = 'Test Message - ' + datetime.now().strftime('%Y%m%d%H%M%S')
+def CreateTextBody():
     body = 'Testing sending with only a single user. Including bad characters: \n\n'
     body += '* Greater Than: >\n'
     body += '* Less Than: <\n'
     body += '* Ampersand: &\n'
     body += '* Single quotes: ' + "How are you? I'm great. 'blue' \n"
     body += '* Double quotes: "blah blah blah"'
-    msg.set_content(body)
+
+    return body
+
+
+def CreateHTMLBody():
+    html = """\
+        <html>
+            <head></head>
+            <body>
+                <p>This is the <b>HTML</b> <i>portion</i> of the message</p>
+                <a href="https://www.google.com" target=_blank>Google</a>
+            </body>
+        </html>"""
+
+    return html
+
+
+def SendTestEmail():
+    cfg_type = GetCurrentConfigType()
+    SendEmail(from_rcpt_me, to_rcpt[cfg_type], 'Test Subject', None, )
+
+
+def SendEmail(from_address: Address, to_list, subject: str, body_text: str,  cc_list=None,
+              body_html: str=None, attachment_paths: list=None):
+
+    if attachment_paths:
+        msg = MIMEMultipart()
+        msg.attach(MIMEText(body_text, 'plain'))
+
+        if body_html:
+            msg.attach(MIMEText(body_html, 'html'))
+
+        for att_path in attachment_paths:
+            msg.attach(CreateAttachment(att_path))
+    else:
+        msg = EmailMessage()
+        msg.set_content(body_text)
+
+    msg['From'] = from_address
+    msg['To'] = to_list
+    msg['Subject'] = subject + ' - ' + datetime.now().strftime('%Y%m%d%H%M%S')
+
+    if cc_list:
+        msg['CC'] = cc_list
 
     SendEmailMessageToServer(msg)
 
 
-def SendTestEmail(valid_sender: bool=True, valid_recipients: bool=True, valid_body: bool=True):
-    # msg = MIMEText('Testing simultaneous forwarding of an email to several users and a room.')
-    msg = EmailMessage()
+def CreateAttachment(file_path: str):
+    abs_path = os.path.abspath(file_path)
+    fp = open(file_path, 'rb')
+    ctype, encoding = mimetypes.guess_type(abs_path)
+    maintype, subtype = ctype.split('/', 1)
 
-    # to_list = (
-    #     Address("Mark", "mark.koblenz", "corp.symphony.com"),
-    #     Address("Kevin", "kevin.mcgrath", "corp.symphony.com"),
-    #    Address("Rani", "rani.ibrahim", "corp.symphony.com"),
-    #    Address("Biz Ops Team", "biz.ops.team", "corp.symphony.com")
-    #)
+    attachment = MIMEBase(maintype, subtype)
+    attachment.set_payload(fp.read())
+    fp.close()
 
-    #to_list = (Address("Olympus", "olympus", "corp.symphony.com"),
-    #             Address("Kevin", "kevin.mcgrath", "corp.symphony.com"))
+    encoders.encode_base64(attachment)
+    attachment.add_header('Content-Disposition', 'attachment', filename=os.path.basename(abs_path))
 
-    to_list = (Address("Kevin", "kevin.mcgrath", "corp.symphony.com"),
-               Address("Mailman Test Room", "mailman_test_room", "corp.symphony.com"))
-
-    # This param can take a tuple and then correctly format it for the message send method
-    if valid_recipients:
-        msg['To'] = to_list
-    else:
-        # I want at least one valid recipient.
-        msg['To'] = (
-            Address("Kevin", "kevin.mcgrath", "corp.symphony.com"),
-            Address("Bob User", "bob.username", "corp.symphony.com"),
-            # This is an invalid address. Underscores, maybe? I need to figure out why this blew up.
-            # Address("Totally fake room jfjlkajslkjf", "totally_fake_room_jfjlkajslkjf", "corp.symphony.com")
-        )
-
-    if valid_sender:
-        # msg['From'] = Address('Ares', "bot.user6", "symphony.com")
-        msg['From'] = Address('Mailman', 'kevin.mcgrath+mailman', 'symphony.com')
-    else:
-        msg['From'] = Address('Hades', "invalid.user", "symphony.com")
-
-    msg['Subject'] = 'Test Message - ' + datetime.now().strftime('%Y%m%d%H%M%S')
-
-    if valid_body:
-        msg.set_content('Testing simultaneous forwarding of an email to several users and a room.')
-    else:
-        msg.set_content('')
-
-    SendEmailMessageToServer(msg)
+    return attachment
 
 
 def SendEmailMessageToServer(msg):
@@ -385,29 +414,11 @@ def RunClient():
         choice = MenuPrompt()
 
         if choice == "1":
-            SendTestEmail()
-        elif choice == "2":
-            SendTestEmail(False)
-        elif choice == "3":
-            SendTestEmail(True, False)
-        elif choice == "4":
-            SendTestEmail(True, True, False)
-        elif choice == "5":
             SendEHLO()
-        elif choice == "6":
-            SendTestWithAttachment2()
-        elif choice == "7":
-            SendSingleUserTestEmail()
-        elif choice == "9":
+        elif choice == "2":
+            SendTestEmail()
+        elif choice == "3":
             SendTestIM()
-        elif choice == "91":
-            SendTestIMwAtt()
-        elif choice == "92":
-            SendOBOTest()
-        elif choice == "93":
-            RoomSearchOBOTest()
-        elif choice == "99":
-            SendEchoTest()
         elif choice == "0":
             exit_flag = True
             print('Exiting')
@@ -416,19 +427,10 @@ def RunClient():
 
 
 def MenuPrompt():
-    prompt = "What do you want to do today? \n\n"
-    prompt += "[1] Send a test email to the local SMTP Server\n"
-    prompt += "[2] Send a test email with an invalid sender \n"
-    prompt += "[3] Send a test email with an invalid recipient \n"
-    prompt += "[4] Send a test email with a malformed body \n"
-    prompt += "[5] Send an EHLO\n"
-    prompt += "[6] Send a test email with an attachment\n"
-    prompt += "[7] Send a test email with a single user\n"
-    prompt += "[9] Send a test message to Symphony\n"
-    prompt += "[91] Send a test message w/ attachment\n"
-    prompt += "[92] Send an OBO test message \n"
-    prompt += "[93] Send an OBO Room Search test\n"
-    prompt += "[99] Send an echo test\n"
+    prompt = "Configuration: " + str(GetCurrentConfigType()) + " - Select Option: \n\n"
+    prompt += "[1] Send EHLO\n"
+    prompt += "[2] Send a test email\n"
+    prompt += "[3] Send a test IM\n"
 
     prompt += "[0] Quit\n"
 

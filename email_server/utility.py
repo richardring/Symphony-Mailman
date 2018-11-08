@@ -1,6 +1,7 @@
 # from collections import Counter  # Used to count the _occurence_ of each word
 from xml.sax.saxutils import escape, quoteattr
 
+
 def ParseOriginalBodyText(input_text: str) -> str:
     # Escape <, >, and &
     output_text = escape(input_text)
