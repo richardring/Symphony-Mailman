@@ -47,7 +47,7 @@ cc_rcpt = {
     SymphonyTarget.DEVELOP: (Address("Miguel", "miguel.clark", "develop.symphony.com"),
                              Address("Mark", "mark.koblenz", "develop.symphony.com")),
     SymphonyTarget.CORPORATE: (Address("Miguel", "miguel.clark", "corporate.symphony.com"),
-                             Address("Mark", "mark.koblenz", "corporate.symphony.com")),
+                               Address("Mark", "mark.koblenz", "corporate.symphony.com")),
 }
 
 symphony_user_ids = {
@@ -146,9 +146,6 @@ def SendTestWithAttachment2():
     SendEmailMessageToServer(msg)
 
 
-
-
-
 def CreateTextBody():
     body = 'Testing sending with only a single user. Including bad characters: \n\n'
     body += '* Greater Than: >\n'
@@ -173,9 +170,10 @@ def CreateHTMLBody():
     return html
 
 
-def SendTestEmail():
+def SendTestEmailStream():
     cfg_type = GetCurrentConfigType()
-    SendEmail(from_rcpt_me, to_rcpt[cfg_type], 'Test Subject', None, )
+    to_add = (Address("Olympus", "olympus", "corporate.symphony.com"))
+    SendEmail(from_rcpt_me, to_add, 'Test Subject', CreateTextBody())
 
 
 def SendEmail(from_address: Address, to_list, subject: str, body_text: str,  cc_list=None,
@@ -416,7 +414,7 @@ def RunClient():
         if choice == "1":
             SendEHLO()
         elif choice == "2":
-            SendTestEmail()
+            SendTestEmailStream()
         elif choice == "3":
             SendTestIM()
         elif choice == "0":
@@ -429,7 +427,7 @@ def RunClient():
 def MenuPrompt():
     prompt = "Configuration: " + str(GetCurrentConfigType()) + " - Select Option: \n\n"
     prompt += "[1] Send EHLO\n"
-    prompt += "[2] Send a test email\n"
+    prompt += "[2] Send a test email (stream)\n"
     prompt += "[3] Send a test IM\n"
 
     prompt += "[0] Quit\n"

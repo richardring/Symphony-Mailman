@@ -117,9 +117,8 @@ def Process(sender: str, recipients: list, email_data):
                     messaging.SendSymphonyMessageV2(stream_id, email.Body_MML, data=None, attachments=email.Attachments)
 
         if user_ids:
-            log.LogConsoleInfoVerbose('Attempting to forward email to IM/MIM...')
-
             if len(user_ids) > 1 and config.UseOnBehalfOf:
+                log.LogConsoleInfoVerbose('Attempting to forward email to MIM...')
                 messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments,
                                        obo_user_id=email.FromUser.Id)
             elif stream_ids and len(user_ids) == 1:
@@ -127,6 +126,7 @@ def Process(sender: str, recipients: list, email_data):
                 pass
             else:
                 # If OBO is disabled or there is only one user (the sender), then create an IM/MIM with Postmaster
+                log.LogConsoleInfoVerbose('Attempting to forward email to IM/MIM...')
                 messaging.SendUserIMv2(user_ids, email.Body_MML, data=None, attachments=email.Attachments)
 
         # Ensure the message is added to the dupe system after submission to Symphony.
