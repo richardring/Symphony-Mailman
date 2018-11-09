@@ -36,8 +36,18 @@ class UserCache(Cache):
 
         return retVal
 
-    def Get_Id(self, email_address: str):
-        cache_item = self.user_cache.find_one({'email_address': email_address})
+    def Get_Id(self, email_address: str, obo_user_id: str):
+        if obo_user_id:
+            # https://stackoverflow.com/questions/12064764/pymongo-query-on-list-field-and-or
+            query = {
+                "$and": [
+                    {"email_address": email_address},
+                    {"obo_user_id": obo_user_id}
+                ]
+            }
+            cache_item = self.user_cache.find_one(query)
+        else:
+            cache_item = self.user_cache.find_one({'email_address': email_address})
 
         if cache_item:
             return cache_item['symphony_id'], cache_item['pretty_name']
@@ -47,10 +57,11 @@ class UserCache(Cache):
     def Delete_Id(self, id: str):
         self.user_cache.delete_one({'symphony_id': id})
 
-    def Insert_Id(self, email_address: str, symphony_id: str, pod_id: str, pretty_name: str=''):
+    def Insert_Id(self, email_address: str, symphony_id: str, obo_user_id: str, pod_id: str, pretty_name: str=''):
         cache_item = {
             'email_address': email_address,
             'symphony_id': symphony_id,
+            'obo_user_id': obo_user_id,
             'pod_id': pod_id,
             'pretty_name': pretty_name
         }

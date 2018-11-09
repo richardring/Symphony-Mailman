@@ -101,6 +101,8 @@ def Process(sender: str, recipients: list, email_data):
     stream_ids = list(set([rcp.Id for rcp in rcp_list if not rcp.Is_Bounced and rcp.Is_Stream]))
 
     log.LogConsoleInfoVerbose('Done. Users found: ' + str(len(user_ids)) + ' Streams found: ' + str(len(stream_ids)))
+    log.LogSystemInfoVerbose('User Ids: ' + str(user_ids))
+    log.LogSystemInfoVerbose('Stream Ids: ' + str(stream_ids))
 
     if email.IsValid:
         log.LogConsoleInfoVerbose('Done. Email subject: ' + email.Subject)

@@ -33,8 +33,9 @@ import symphony.chatroom as room
 # 3. Check if local part contains any domains listed in settings.valid_domains => Lookup email with @ between
 #       matched domain and remainder of the local part
 # 4. Lookup for email of form:  local_part@standard_email_domain
-# 5. Search for room, replacing all special chars with spaces
-# 6. Search for users, replacing all special chars with spaces
+# 5. Match room against a list of all rooms the obo user is a part of
+# 6. Search for room, replacing all special chars with spaces
+# 7. Search for users, replacing all special chars with spaces
 
 # Process Results
 # 1. If all recipients are identified, send message, do not reply
@@ -46,11 +47,11 @@ def GetSingleRecipient(user_email):
     return IdentifyParticipant(user_email)
 
 
-def GetRecipients(recipient_list):
+def GetRecipients(recipient_list, obo_user_id: str=None):
     rcp_list = []
 
     for email_address in recipient_list:
-        rcp_list.append(IdentifyParticipant(email_address))
+        rcp_list.append(IdentifyParticipant(email_address, obo_user_id))
 
     return rcp_list
 
@@ -70,13 +71,13 @@ def IdentifySender(r_email: str):
 
 # Using short-circuiting here to evaluate each step in turn and return the first
 # valid recipient record found
-def IdentifyParticipant(r_email: str):
+def IdentifyParticipant(r_email: str, obo_user_id: str=None):
     rcp = CheckCache(r_email)
 
     if not rcp:
         rcp = CheckIsUserId(r_email) or CheckIsStreamId(r_email) or CheckIsFullEmail(r_email)\
-            or CheckIsStandardEmail(r_email) or CheckIsRoomName(r_email)\
-            or SearchUser(r_email) or SearchUser(r_email, local_part_only=True)
+            or CheckIsStandardEmail(r_email) or CheckIsRoomFromUserList(r_email, obo_user_id)\
+            or CheckIsRoomName(r_email) or SearchUser(r_email) or SearchUser(r_email, local_part_only=True)
 
         if not rcp:
             # If the email address is not found, create a default recipient to be used
@@ -84,7 +85,8 @@ def IdentifyParticipant(r_email: str):
             rcp = Recipient(r_email)
 
         # Add value to the cache for future use. Including failed lookups.
-        User_Cache.Insert_Id(r_email, rcp.Id, 'preview', rcp.Room_Name)
+        # TODO: Figure out how I want to deal with caching rooms found by the user listing (obo specific)
+        User_Cache.Insert_Id(r_email, rcp.Id, 'corporate', rcp.Room_Name)
 
     return rcp
 
@@ -101,7 +103,7 @@ def SearchUser(r_email: str, local_part_only: bool=False):
     return None
 
 
-# Step 5
+# Step 6
 def CheckIsRoomName(r_email: str):
     local_part = r_email.split('@')[0]
     log.LogConsoleInfoVerbose('Attempting room search for: ' + local_part)
@@ -110,6 +112,21 @@ def CheckIsRoomName(r_email: str):
     if stream_id:
         log.LogConsoleInfoVerbose('S5 - Room Search: ' + r_email + ' is a room name.')
         return Recipient(r_email, stream_id, True, room_name)
+
+    return None
+
+
+# Step 5
+def CheckIsRoomFromUserList(r_email: str, obo_user_id: str=None):
+    # Don't bother doing the search if OBO isn't specified
+    if config.UseOnBehalfOf and obo_user_id:
+        local_part = r_email.split('@')[0]
+        log.LogConsoleInfoVerbose('Attempting to match room based on room membership for: ' + local_part)
+        stream_id, room_name = room.FindRoomByUserStreamList(local_part, obo_user_id)
+
+        if stream_id:
+            log.LogConsoleInfoVerbose('S5 - Room Search by List: ' + r_email + ' is a room name.')
+            return Recipient(r_email, stream_id, True, room_name)
 
     return None
 

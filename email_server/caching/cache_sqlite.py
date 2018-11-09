@@ -12,10 +12,10 @@ class UserCache(Cache):
     _create_sql += '(email TEXT PRIMARY KEY, sym_id TEXT, pod_id TEXT, pretty_name TEXT)'
 
     _create_index = 'CREATE INDEX IF NOT EXISTS key_index ON address_cache (email)'
-    _get_sql = 'SELECT email, sym_id FROM address_cache WHERE email = ?'
+    _get_sql = 'SELECT email, sym_id, obo_user_id FROM address_cache WHERE email = ? AND obo_user_id = ?'
     _del_sql = 'DELETE FROM address_cache WHERE email = ?'
-    _update_sql = 'REPLACE INTO address_cache (email, sym_id, pod_id, pretty_name) VALUES (?, ?, ?, ?)'
-    _insert_sql = 'INSERT INTO address_cache (email, sym_id, pod_id, pretty_name) VALUES (?, ?, ?, ?)'
+    _update_sql = 'REPLACE INTO address_cache (email, sym_id, obo_user_id, pod_id, pretty_name) VALUES (?, ?, ?,  ?, ?)'
+    _insert_sql = 'INSERT INTO address_cache (email, sym_id, obo_user_id, pod_id, pretty_name) VALUES (?, ?, ?, ?, ?)'
     _clear_all_sql = 'DELETE FROM address_cache'
 
     conn = None
@@ -52,11 +52,11 @@ class UserCache(Cache):
 
         return self.conn
 
-    def Get_Id(self, email_address):
+    def Get_Id(self, email_address: str, obo_user_id: str):
         user_id = ''
         pretty_name = ''
         with self.Get_Connection() as conn:
-            for row in conn.execute(self._get_sql, (email_address,)):
+            for row in conn.execute(self._get_sql, (email_address, obo_user_id,)):
                 # There should only be one row for each email
                 user_id = str(row['sym_id'])
                 pretty_name = str(row['pretty_name'])
@@ -68,19 +68,19 @@ class UserCache(Cache):
         with self.conn as conn:
             conn.execute(self._del_sql, (email_address,))
 
-    def Update_Id(self, email_address: str, sym_id: str, pod_id: str, pretty_name: str=''):
+    def Update_Id(self, email_address: str, sym_id: str, obo_user_id: str, pod_id: str, pretty_name: str=''):
 
         with self.Get_Connection() as conn:
-            conn.execute(self._update_sql, (email_address, sym_id, pod_id, pretty_name))
+            conn.execute(self._update_sql, (email_address, sym_id, obo_user_id, pod_id, pretty_name))
 
-    def Insert_Id(self, email_address: str, sym_id: str, pod_id: str, pretty_name: str=''):
+    def Insert_Id(self, email_address: str, sym_id: str, obo_user_id: str, pod_id: str, pretty_name: str=''):
         with self.Get_Connection() as conn:
             try:
-                conn.execute(self._insert_sql, (email_address, sym_id, pod_id, pretty_name))
+                conn.execute(self._insert_sql, (email_address, sym_id, obo_user_id, pod_id, pretty_name))
             except sqlite3.IntegrityError:
                 # attempt to store a duplicate entry
                 log.LogSystemWarn('Attempt to insert an existing email into the cache (' + email_address + ')')
-                self.Update_Id(email_address, sym_id, pod_id, pretty_name)
+                self.Update_Id(email_address, sym_id, obo_user_id, pod_id, pretty_name)
                 pass
 
     def Clear_All(self):

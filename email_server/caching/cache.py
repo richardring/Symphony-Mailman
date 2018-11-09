@@ -11,7 +11,7 @@ class Cache(ABC):
         pass
 
     @abstractmethod
-    def Get_Id(self, email_address: str) -> str:
+    def Get_Id(self, email_address: str, obo_user_id: str) -> str:
         pass
 
     @abstractmethod
@@ -19,7 +19,7 @@ class Cache(ABC):
         pass
 
     @abstractmethod
-    def Insert_Id(self, email_address: str, symphony_id: str, pod_id: str, pretty_name: str=''):
+    def Insert_Id(self, email_address: str, symphony_id: str, obo_user_id: str, pod_id: str, pretty_name: str=''):
         pass
 
     @abstractmethod

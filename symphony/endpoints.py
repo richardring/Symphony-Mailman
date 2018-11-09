@@ -64,5 +64,9 @@ def SearchRoom_Endpoint():
     return config.SymphonyBaseURL + '/pod/v3/room/search?limit=5'
 
 
+def ListUserStreams_Endpoint(limit: int=50, skip: int=0):
+    return config.SymphonyBaseURL + '/pod/v1/streams/list?limit=' + str(limit) + '&skip=' + str(skip)
+
+
 def SetPresence_Endpoint():
     return config.SymphonyBaseURL + '/pod/v2/user/presence'

@@ -51,11 +51,13 @@ class EmailMessage:
         self.FromUser = users.GetSingleRecipient(self.FromEmail)
         self.RecipientList.append(self.FromUser)
 
-        self.ToUsers = users.GetRecipients(self.ToEmailList)
+        obo_user_id = self.FromUser.Id if config.UseOnBehalfOf else None
+
+        self.ToUsers = users.GetRecipients(self.ToEmailList, obo_user_id)
         self.RecipientList += self.ToUsers
 
         if self.CCEmailList:
-            self.CCUsers = users.GetRecipients(self.CCEmailList)
+            self.CCUsers = users.GetRecipients(self.CCEmailList, obo_user_id)
             self.RecipientList += self.CCUsers
 
     def ParseEmailAddresses(self):

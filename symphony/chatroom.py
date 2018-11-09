@@ -62,3 +62,34 @@ def SearchRoomByName(room_name: str, obo_user_id: str=None):
         return stream_id, room_name
 
     return None, None
+
+
+def FindRoomByUserStreamList(room_name: str, obo_user_id: str):
+    query = room_name.replace('_', ' ').replace('.', ' ').replace('-', ' ').replace('+', ' ').strip().lower()
+    query = re.sub(' +', ' ', query)
+
+    search_in_progress = True
+    skip_index = 0
+
+    body = {"streamTypes": [{"type": "ROOM"}]}
+
+    while search_in_progress:
+        endpoint = ep.ListUserStreams_Endpoint(50, skip_index)
+
+        resp = conn_obo.SymphonyPOST(endpoint, body, obo_user_id)
+
+        room_list = resp.json()
+
+        if room_list:
+            skip_index += 1
+
+            for room_item in room_list:
+                stream_id = room_item['id']
+                name = room_item['roomAttributes']['name']
+
+                if RemoveNonAlpha(name) == query:
+                    return stream_id, name
+        else:
+            search_in_progress = False
+
+    return None, None
