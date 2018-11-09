@@ -72,7 +72,7 @@ def IdentifySender(r_email: str):
 # Using short-circuiting here to evaluate each step in turn and return the first
 # valid recipient record found
 def IdentifyParticipant(r_email: str, obo_user_id: str=None):
-    rcp = CheckCache(r_email)
+    rcp = CheckCache(r_email, obo_user_id)
 
     if not rcp:
         rcp = CheckIsUserId(r_email) or CheckIsStreamId(r_email) or CheckIsFullEmail(r_email)\
@@ -85,8 +85,7 @@ def IdentifyParticipant(r_email: str, obo_user_id: str=None):
             rcp = Recipient(r_email)
 
         # Add value to the cache for future use. Including failed lookups.
-        # TODO: Figure out how I want to deal with caching rooms found by the user listing (obo specific)
-        User_Cache.Insert_Id(r_email, rcp.Id, 'corporate', rcp.Room_Name)
+        User_Cache.Insert_Id(r_email, rcp.Id, obo_user_id, 'corporate', rcp.Room_Name)
 
     return rcp
 
@@ -195,19 +194,19 @@ def CheckIsUserId(r_email: str):
 
 
 # Step 0
-def CheckCache(r_email: str):
+def CheckCache(r_email: str, obo_user_id: str):
     if config.UseCache and CacheEnabled:
 
         try:
-            id, pretty_name = User_Cache.Get_Id(r_email)
+            uid, pretty_name = User_Cache.Get_Id(r_email, obo_user_id)
 
-            if id:
-                if id.isnumeric():
+            if uid:
+                if uid.isnumeric():
                     log.LogConsoleInfoVerbose('S0 - Cache hit (user) for ' + r_email)
-                    return Recipient(r_email, id, False)
-                elif "___" in id:
+                    return Recipient(r_email, uid, False)
+                elif "___" in uid:
                     log.LogConsoleInfoVerbose('S0 - Cache hit (room) for ' + r_email)
-                    return Recipient(r_email, id, True, pretty_name)
+                    return Recipient(r_email, uid, True, pretty_name)
         except Exception as ex:
             exceptions.LogException(ex)
 
